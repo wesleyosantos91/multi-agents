@@ -2,7 +2,7 @@
 
 ## Agente Principal
 
-O agente padrão deste projeto é o **architect-orchestrator**.
+O agente padrão deste projeto é o **staff-engineer-orchestrator**.
 
 Toda demanda não trivial deve passar pelo orquestrador antes de qualquer implementação.
 O orquestrador consulta os especialistas, consolida achados, resolve conflitos e entrega o plano final.
@@ -253,6 +253,13 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Paginação e concorrência
 - [ ] Aderência ao ecossistema AWS
 
+### Contratos de borda
+- [ ] Compatibilidade evolutiva (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI)
+- [ ] Breaking changes identificados e justificados
+- [ ] Schema governance e versionamento
+- [ ] Testes de contrato
+- [ ] Schema Registry configurado (quando Avro/Protobuf)
+
 ### Infraestrutura como código
 - [ ] Terraform quando aplicável
 - [ ] Módulos, variáveis e outputs organizados
@@ -262,22 +269,23 @@ Toda proposta, revisão ou implementação deve validar:
 
 ## Ordem Padrão de Consulta dos Agentes
 
-O `architect-orchestrator` deve consultar os agentes nesta ordem preferencial:
+O `staff-engineer-orchestrator` deve consultar os agentes nesta ordem preferencial:
 
 1. `tech-lead-reviewer` — pragmatismo, simplicidade, manutenibilidade
 2. `architect-reviewer` — arquitetura, boundaries, trade-offs, resiliência
-3. `security-reviewer` — segurança, hardening, superfícies de abuso
-4. `ad-dba-reviewer` — dados, persistência, modelagem, queries
-5. `software-engineer` — implementação mínima correta
-6. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
-7. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
-8. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+3. `api-contract-reviewer` — contratos de borda, breaking changes, schema governance
+4. `security-reviewer` — segurança, hardening, superfícies de abuso
+5. `ad-dba-reviewer` — dados, persistência, modelagem, queries
+6. `software-engineer` — implementação mínima correta
+7. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
+8. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
+9. `performance-reliability-reviewer` — throughput, latência, escalabilidade
 
 ---
 
 ## Regras Obrigatórias de Execução
 
-1. Toda demanda não trivial passa pelo `architect-orchestrator` antes de implementação.
+1. Toda demanda não trivial passa pelo `staff-engineer-orchestrator` antes de implementação.
 2. O orquestrador consulta os especialistas relevantes antes de decidir.
 3. Nenhum agente implementa sem análise adequada.
 4. O orquestrador consolida achados, resolve conflitos e define o plano final.

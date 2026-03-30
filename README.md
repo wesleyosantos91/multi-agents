@@ -4,16 +4,16 @@
 
 Uma estrutura de **orquestracao multiagente** para o [Claude Code](https://docs.anthropic.com/en/docs/claude-code) que simula um **time de engenharia completo** dentro do seu terminal.
 
-Em vez de um unico agente fazendo tudo, voce tem **9 agentes especializados** — cada um com papel, escopo, checklist e formato de saida definidos — coordenados por um **orquestrador principal** (o `architect-orchestrator`) que funciona como maestro.
+Em vez de um unico agente fazendo tudo, voce tem **10 agentes especializados** — cada um com papel, escopo, checklist e formato de saida definidos — coordenados por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
 
 ### Analogia simples
 
 Imagine que voce tem uma demanda tecnica complexa. Em vez de pedir para um unico engenheiro resolver tudo sozinho, voce:
 
-1. Leva a demanda para o **arquiteto lider** (orquestrador)
+1. Leva a demanda para o **staff engineer** (orquestrador)
 2. Ele distribui a analise para os especialistas do time
 3. Cada especialista analisa sob sua perspectiva
-4. O arquiteto lider consolida tudo, resolve conflitos e entrega o plano final
+4. O staff engineer consolida tudo, resolve conflitos e entrega o plano final
 
 Isso e exatamente o que essa estrutura faz — automaticamente, dentro do Claude Code.
 
@@ -39,7 +39,7 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 
 | Ganho | Descricao |
 |-------|-----------|
-| **Cobertura ampla** | 8 perspectivas especializadas em vez de uma generica |
+| **Cobertura ampla** | 9 perspectivas especializadas em vez de uma generica |
 | **Qualidade de analise** | Cada agente tem checklist e regras mandatorias do seu dominio |
 | **Rastreabilidade** | Saida estruturada com secoes fixas — facil de auditar e comparar |
 | **Conflitos explicitos** | Quando dois agentes discordam, o orquestrador explicita e resolve |
@@ -56,7 +56,7 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 | **Custo de tokens** | Cada agente consome tokens. Demandas simples custam mais que o necessario |
 | **Complexidade inicial** | Precisa entender a estrutura antes de usar com eficiencia |
 | **Maturidade do Claude Code** | O recurso de agentes customizados ainda esta em evolucao |
-| **Overhead para tarefas simples** | Para um bugfix pontual, acionar 8 agentes e desproporcional |
+| **Overhead para tarefas simples** | Para um bugfix pontual, acionar 9 agentes e desproporcional |
 
 **Regra pratica**: use o orquestrador para demandas nao triviais. Para tarefas simples, acione diretamente o agente relevante.
 
@@ -71,9 +71,10 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 └── .claude/
     ├── settings.json                            # Configuracao do Claude Code
     └── agents/                                  # Agentes especializados
-        ├── architect-orchestrator.md             # Maestro principal
+        ├── staff-engineer-orchestrator.md             # Maestro principal
         ├── tech-lead-reviewer.md                 # Pragmatismo e manutenibilidade
         ├── architect-reviewer.md                 # Arquitetura e boundaries
+        ├── api-contract-reviewer.md              # Contratos de borda e schema governance
         ├── security-reviewer.md                  # Seguranca e hardening
         ├── ad-dba-reviewer.md                    # Dados e persistencia
         ├── software-engineer.md                  # Implementacao
@@ -87,7 +88,7 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 | Arquivo | Funcao |
 |---------|--------|
 | `CLAUDE.md` | Documento de governanca lido automaticamente pelo Claude Code. Define stack, regras arquiteturais, checklists transversais e ordem de consulta dos agentes. Todo agente respeita o que esta aqui. |
-| `.claude/settings.json` | Configura o `architect-orchestrator` como agente padrao do projeto. Quando voce abre o Claude Code neste repo, ele ja sabe qual agente usar. |
+| `.claude/settings.json` | Configura o `staff-engineer-orchestrator` como agente padrao do projeto. Quando voce abre o Claude Code neste repo, ele ja sabe qual agente usar. |
 | `.claude/agents/*.md` | Cada arquivo define um agente com: papel, escopo, regras, checklist e formato de saida obrigatorio. |
 
 ---
@@ -100,28 +101,28 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 Voce faz uma pergunta ou pede uma implementacao
          │
          ▼
-┌─────────────────────────┐
-│  architect-orchestrator  │  ← Entende a demanda, identifica stack e modulos
-└────────────┬────────────┘
-             │
-             ▼
+┌──────────────────────────────────┐
+│  staff-engineer-orchestrator     │  ← Entende a demanda, identifica stack e modulos
+└───────────────┬──────────────────┘
+                │
+                ▼
     Aciona especialistas (em paralelo quando possivel)
-             │
-     ┌───────┼───────┬───────┬───────┬───────┬───────┬───────┐
-     ▼       ▼       ▼       ▼       ▼       ▼       ▼       ▼
-  tech-   archi-  securi-  ad-dba  soft-    sre-    qa-    perfor-
-  lead    tect    ty               ware    plat-   quali-  mance
-                                   eng     form    ty
-     │       │       │       │       │       │       │       │
-     └───────┴───────┴───────┴───────┴───────┴───────┴───────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  architect-orchestrator  │  ← Consolida, resolve conflitos, prioriza
-└────────────┬────────────┘
-             │
-             ▼
-    Resposta final estruturada (15 secoes)
+                │
+  ┌─────┬──────┼──────┬──────┬──────┬──────┬──────┬──────┐
+  ▼     ▼      ▼      ▼      ▼      ▼      ▼      ▼      ▼
+tech- archi-  api-  securi- ad-   soft-   sre-   qa-   perfor-
+lead  tect   cont-  ty     dba   ware   plat-  quali- mance
+             ract               eng    form   ty
+  │     │      │      │      │      │      │      │      │
+  └─────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
+                │
+                ▼
+┌──────────────────────────────────┐
+│  staff-engineer-orchestrator     │  ← Consolida, resolve conflitos, prioriza
+└───────────────┬──────────────────┘
+                │
+                ▼
+    Resposta final estruturada (16 secoes)
 ```
 
 ### Ordem de consulta
@@ -132,12 +133,13 @@ O orquestrador segue esta ordem preferencial:
 |---|--------|------|
 | 1 | `tech-lead-reviewer` | Pragmatismo, simplicidade, custo de manutencao |
 | 2 | `architect-reviewer` | Boundaries, acoplamento, resiliencia, contratos |
-| 3 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
-| 4 | `ad-dba-reviewer` | Dados, modelagem, queries, indices, CAP theorem |
-| 5 | `software-engineer` | Implementacao minima correta |
-| 6 | `sre-platform-engineer` | Operabilidade, deploy, observabilidade, IaC |
-| 7 | `qa-quality-engineer` | Testes, edge cases, regressoes |
-| 8 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
+| 3 | `api-contract-reviewer` | Contratos de borda, breaking changes, schema governance |
+| 4 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
+| 5 | `ad-dba-reviewer` | Dados, modelagem, queries, indices, CAP theorem |
+| 6 | `software-engineer` | Implementacao minima correta |
+| 7 | `sre-platform-engineer` | Operabilidade, deploy, observabilidade, IaC |
+| 8 | `qa-quality-engineer` | Testes, edge cases, regressoes |
+| 9 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
 
 ---
 
@@ -158,7 +160,7 @@ cd multi-agents
 # 2. Abra o Claude Code
 claude
 
-# 3. O architect-orchestrator ja e o agente padrao.
+# 3. O staff-engineer-orchestrator ja e o agente padrao.
 #    Basta fazer sua pergunta ou pedir uma implementacao.
 ```
 
@@ -173,6 +175,7 @@ Voce: Preciso adicionar um endpoint REST para consulta de pedidos
 Orchestrator:
   → Aciona tech-lead-reviewer (simplicidade, padroes)
   → Aciona architect-reviewer (boundaries, contratos REST)
+  → Aciona api-contract-reviewer (OpenAPI, breaking changes)
   → Aciona security-reviewer (validacao, autorizacao)
   → Aciona ad-dba-reviewer (query, indice, paginacao)
   → Aciona software-engineer (implementacao)
@@ -180,7 +183,7 @@ Orchestrator:
   → Aciona qa-quality-engineer (testes)
   → Aciona performance-reliability-reviewer (latencia, N+1)
 
-  → Consolida tudo em resposta com 15 secoes
+  → Consolida tudo em resposta com 16 secoes
 ```
 
 #### Exemplo 2: Revisao de codigo existente
@@ -272,7 +275,9 @@ Apos o frontmatter, o conteudo Markdown define:
 | `Bash` | Executa comandos no terminal | orchestrator, software-engineer, sre-platform |
 | `Agent` | Invoca outros agentes | orchestrator (apenas ele) |
 
-**Decisao de design**: agentes de revisao so podem ler. Apenas o `software-engineer` e o `architect-orchestrator` podem modificar arquivos. Isso evita que revisores facam mudancas sem consolidacao.
+**Decisao de design**: agentes de revisao so podem ler. Apenas o `software-engineer` e o `staff-engineer-orchestrator` podem modificar arquivos. Isso evita que revisores facam mudancas sem consolidacao.
+
+> O `api-contract-reviewer` tambem e somente leitura — ele revisa contratos (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI, JSON Schema) mas nao os modifica diretamente.
 
 ### Escolha de modelo
 
@@ -342,7 +347,7 @@ Descricao do que deve conter.
 
 ### Passo 4: Registre no orquestrador (se necessario)
 
-Se o novo agente deve ser consultado pelo `architect-orchestrator`, edite o arquivo `.claude/agents/architect-orchestrator.md` e adicione-o na ordem de consulta.
+Se o novo agente deve ser consultado pelo `staff-engineer-orchestrator`, edite o arquivo `.claude/agents/staff-engineer-orchestrator.md` e adicione-o na ordem de consulta.
 
 ### Passo 5: Atualize o CLAUDE.md (se necessario)
 
@@ -404,24 +409,25 @@ Acoes com prioridade.
 
 ## Anatomia da resposta do orquestrador
 
-Toda resposta do `architect-orchestrator` segue **exatamente** esta estrutura:
+Toda resposta do `staff-engineer-orchestrator` segue **exatamente** esta estrutura:
 
 ```
 1.  Diagnostico inicial           → O que foi pedido e o contexto
 2.  Stack e modulos impactados    → Tecnologias e areas afetadas
 3.  Achados do Tech Lead          → Pragmatismo e manutencao
 4.  Achados do Architect          → Arquitetura e boundaries
-5.  Achados do Security           → Seguranca e riscos
-6.  Achados do AD/DBA             → Dados e persistencia
-7.  Achados do Software Engineer  → Implementacao proposta
-8.  Achados do SRE/Platform       → Operabilidade e deploy
-9.  Achados do QA/Quality         → Testes e qualidade
-10. Achados do Performance        → Performance e confiabilidade
-11. Conflitos entre recomendacoes → Divergencias e resolucao
-12. Plano final priorizado        → Acoes ordenadas por prioridade
-13. Diff sugerido                 → Mudancas concretas
-14. Riscos remanescentes          → O que ainda pode dar errado
-15. Estrategia de validacao       → Como confirmar que esta correto
+5.  Achados do API Contract       → Contratos, breaking changes, schema governance
+6.  Achados do Security           → Seguranca e riscos
+7.  Achados do AD/DBA             → Dados e persistencia
+8.  Achados do Software Engineer  → Implementacao proposta
+9.  Achados do SRE/Platform       → Operabilidade e deploy
+10. Achados do QA/Quality         → Testes e qualidade
+11. Achados do Performance        → Performance e confiabilidade
+12. Conflitos entre recomendacoes → Divergencias e resolucao
+13. Plano final priorizado        → Acoes ordenadas por prioridade
+14. Diff sugerido                 → Mudancas concretas
+15. Riscos remanescentes          → O que ainda pode dar errado
+16. Estrategia de validacao       → Como confirmar que esta correto
 ```
 
 Essa estrutura fixa garante:
@@ -489,7 +495,7 @@ tools:
 
 ### Remover um agente do fluxo
 
-1. Remova da lista de consulta no `architect-orchestrator.md`
+1. Remova da lista de consulta no `staff-engineer-orchestrator.md`
 2. Remova da lista no `CLAUDE.md`
 3. Opcionalmente, delete o arquivo `.claude/agents/nome.md`
 
@@ -511,7 +517,7 @@ A estrutura de agentes (`.claude/agents/*.md`) funciona com qualquer projeto no 
 
 ### Quanto custa em tokens?
 
-Depende da demanda. Uma analise completa com 8 agentes consome significativamente mais tokens que um unico agente. Para tarefas simples, o custo extra nao se justifica — por isso o orquestrador tem a regra de agir diretamente em tarefas triviais.
+Depende da demanda. Uma analise completa com 9 agentes consome significativamente mais tokens que um unico agente. Para tarefas simples, o custo extra nao se justifica — por isso o orquestrador tem a regra de agir diretamente em tarefas triviais.
 
 ### Posso usar em outro repositorio?
 
