@@ -7,8 +7,9 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 ```
 .
 ├── claude-code/   # Claude Code — .claude/agents/*.md + CLAUDE.md
-├── codex/         # OpenAI Codex — codex/skills/*/SKILL.md + AGENTS.md
-└── copilot/       # GitHub Copilot — docs/ai/roles/*.md + .github/copilot-instructions.md
+├── codex/         # OpenAI Codex — skills/*/SKILL.md + AGENTS.md
+├── copilot/       # GitHub Copilot — docs/ai/roles/*.md + .github/copilot-instructions.md
+└── gemini/        # Google Gemini — docs/ai/roles/*.md + docs/ai/gemini-instructions.md
 ```
 
 ## Papeis (consistentes entre plataformas)
@@ -28,12 +29,12 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 
 ## Comparativo entre plataformas
 
-| Aspecto | Claude Code | Codex | Copilot |
-|---------|------------|-------|---------|
-| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` | `.github/copilot-instructions.md` |
-| Agentes/roles | `.claude/agents/*.md` | `skills/*/SKILL.md` | `docs/ai/roles/*.md` |
-| Sub-agentes | `Agent(...)` nativo | Leitura sequencial | Referencia no prompt |
-| Modelo por agente | Frontmatter YAML | Runtime | Nao configuravel |
-| Orquestracao | Automatica | Semi-automatica | Manual via prompt |
+| Aspecto | Claude Code | Codex | Copilot | Gemini |
+|---------|------------|-------|---------|--------|
+| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` | `.github/copilot-instructions.md` | `docs/ai/gemini-instructions.md` |
+| Agentes/roles | `.claude/agents/*.md` | `skills/*/SKILL.md` | `docs/ai/roles/*.md` | `docs/ai/roles/*.md` |
+| Sub-agentes | `Agent(...)` nativo | Leitura sequencial | Referencia no prompt | Referencia no prompt |
+| Modelo por agente | Frontmatter YAML | Runtime | Nao configuravel | Nao configuravel |
+| Orquestracao | Automatica | Semi-automatica | Manual via prompt | Manual via prompt |
 
 Consulte o README de cada pasta para instrucoes detalhadas de uso.
