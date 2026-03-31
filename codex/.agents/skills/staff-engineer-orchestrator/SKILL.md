@@ -79,7 +79,7 @@ Aplique as análises especializadas nesta ordem preferencial:
 
 ### Como aplicar
 
-Para cada skill relevante, leia o `SKILL.md` correspondente em `codex/skills/`, aplique a análise sob aquela perspectiva, e registre os achados. Quando a demanda for ampla, aplique todas. Quando for restrita, aplique somente as relevantes.
+Para cada skill relevante, leia o `SKILL.md` correspondente em `.agents/skills/`, aplique a análise sob aquela perspectiva, e registre os achados. Quando a demanda for ampla, aplique todas. Quando for restrita, aplique somente as relevantes.
 
 ## Checklist transversal obrigatório
 

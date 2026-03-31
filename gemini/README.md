@@ -8,6 +8,26 @@ O repositório utiliza o conceito de **Contexto Persistente** e **Comandos Custo
 
 ---
 
+## Pré-requisitos
+
+1. Instale o Gemini CLI:
+   ```bash
+   npm install -g @google/gemini-cli
+   ```
+2. Autentique com sua conta Google ou configure sua `GEMINI_API_KEY`:
+   ```bash
+   gemini auth login
+   # ou
+   export GEMINI_API_KEY="sua-chave-aqui"
+   ```
+3. Execute o Gemini CLI **dentro do diretório `gemini/`** do repositório para que o `GEMINI.md` e os comandos customizados sejam carregados automaticamente:
+   ```bash
+   cd gemini/
+   gemini
+   ```
+
+---
+
 ## Estrutura de Orquestração Nativa
 
 A estrutura atual segue o padrão oficial do Gemini CLI:
@@ -34,12 +54,16 @@ Você pode invocar especialistas diretamente para tarefas específicas usando a 
 | Comando | Papel | Quando usar |
 | :--- | :--- | :--- |
 | `/upgrade-plan` | **Orchestrator** | Criar planos complexos de refatoração ou migração. |
-| `/review-architecture` | **Architect** | Revisar limites de sistema, resiliência e trade-offs. |
+| `/review-architecture` | **Architect + Orchestrator** | Revisar limites de sistema, resiliência e trade-offs. |
+| `/tech-lead-reviewer` | **Tech Lead** | Validar simplicidade e evitar débitos técnicos. |
+| `/architect-reviewer` | **Architect** | Decisões estruturais, acoplamento e coesão. |
 | `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
 | `/security-reviewer` | **Security** | Validar vulnerabilidades, auth e hardening. |
+| `/api-contract-reviewer` | **API Contract** | Estabilidade de contratos, breaking changes e schema governance. |
 | `/ad-dba-reviewer` | **DBA** | Revisar modelagem de dados, queries e índices. |
-| `/sre-platform-engineer`| **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
-| `/tech-lead-reviewer` | **Tech Lead** | Validar simplicidade e evitar débitos técnicos. |
+| `/qa-quality-engineer` | **QA** | Cenários de teste, edge cases e riscos de regressão. |
+| `/performance-reliability-reviewer` | **Performance** | Throughput, latência, GC e escalabilidade. |
+| `/sre-platform-engineer` | **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
 
 #### Exemplos de Uso no Terminal:
 
@@ -85,8 +109,19 @@ gemini/
 
 ## Como Adicionar um Novo Especialista
 
-1. **Crie a documentação:** Adicione um arquivo `.md` em `docs/ai/roles/` com o escopo e regras do papel.
-2. **Crie o comando:** Adicione um arquivo `.toml` em `.gemini/commands/roles/` referenciando o arquivo `.md` no campo `context`.
+1. **Crie a documentação:** Adicione um arquivo `.md` em `docs/ai/roles/` com o escopo, regras e checklist do papel.
+
+2. **Crie o comando:** Adicione um arquivo `.toml` em `.gemini/commands/roles/` com o seguinte formato:
+   ```toml
+   description = "Descrição curta exibida no /help"
+   prompt = """
+   !{cat docs/ai/roles/nome-do-papel.md}
+
+   Você é o [Nome do Papel] conforme definido acima. [Instrução resumida de persona e prioridade.]
+   """
+   ```
+   > O `!{cat ...}` injeta o conteúdo do arquivo `.md` no prompt no momento da invocação.
+
 3. **Registre:** Adicione o novo comando na lista de comandos do `GEMINI.md`.
 
 ---

@@ -1,3 +1,6 @@
 description = "Consulta o Security Reviewer sobre modelagem de ameaças, hardening e proteção"
-systemPrompt = "Você é o Security Reviewer. Proteja a aplicação, identifique superfícies de ataque e avalie hardening e autenticação."
-context = ["docs/ai/roles/security-reviewer.md"]
+prompt = """
+!{cat docs/ai/roles/security-reviewer.md}
+
+Você é o Security Reviewer conforme definido acima. Proteja a aplicação, identifique superfícies de ataque e avalie hardening e autenticação.
+"""

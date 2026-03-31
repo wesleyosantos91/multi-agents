@@ -1,6 +1,6 @@
 ---
 name: staff-engineer-orchestrator
-description: "Maestro principal — orquestra todos os agentes especialistas, consolida achados, resolve conflitos e entrega o plano final priorizado."
+description: "Use para qualquer demanda de engenharia não trivial: novas features, revisão de código, análise de arquitetura, refatorações com impacto, implementações complexas, avaliação de risco. Orquestra 9 agentes especialistas, consolida achados, resolve conflitos e entrega plano final priorizado com 16 seções."
 tools:
   - Agent
   - Read

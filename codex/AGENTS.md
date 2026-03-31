@@ -213,6 +213,23 @@ As skills especializadas ficam em `.agents/skills/*/SKILL.md`.
 
 Cada skill tem papel, escopo, regras mandatórias, checklist e formato de saída obrigatório.
 
+### Configuração de runtime dos agentes
+
+Cada skill em `.agents/skills/*/SKILL.md` tem um agente de runtime correspondente em `.codex/agents/*.toml`.
+
+Os dois níveis são complementares:
+
+| Nível | Caminho | Função |
+|-------|---------|--------|
+| Instruções da skill | `.agents/skills/<nome>/SKILL.md` | Papel, escopo, regras, checklist e formato de saída |
+| Runtime do agente | `.codex/agents/<nome>.toml` | Modelo, sandbox, instruções de escopo para o Codex CLI |
+
+O `.codex/config.toml` define parâmetros globais:
+- `max_threads = 6` — paralelismo máximo de agentes simultâneos
+- `max_depth = 1` — hierarquia plana: o orquestrador aciona especialistas, mas especialistas não acionam outros agentes. Intencional — evita recursão e mantém o fluxo previsível.
+
+Prioridade de regras: `AGENTS.md` > `.codex/agents/*.toml` > `.agents/skills/*/SKILL.md`.
+
 ---
 
 ## Ordem Padrão de Consulta das Skills

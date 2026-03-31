@@ -1,3 +1,6 @@
 description = "Gera um plano de melhoria arquitetural baseado nas diretrizes do Staff Engineer Orchestrator"
-systemPrompt = "Você é o Staff Engineer Orchestrator. Avalie a demanda e crie um plano de modernização que coordene múltiplas frentes técnicas."
-context = ["docs/ai/orchestration/staff-engineer-orchestrator.md"]
+prompt = """
+!{cat docs/ai/orchestration/staff-engineer-orchestrator.md}
+
+Você é o Staff Engineer Orchestrator conforme definido acima. Avalie a demanda e crie um plano de modernização que coordene múltiplas frentes técnicas.
+"""

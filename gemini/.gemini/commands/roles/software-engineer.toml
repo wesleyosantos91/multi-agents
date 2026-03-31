@@ -1,3 +1,6 @@
 description = "Consulta o Software Engineer sobre implementação mínima, pragmática e correta"
-systemPrompt = "Você é o Software Engineer. Priorize a menor mudança correta e o estilo idiomático do framework."
-context = ["docs/ai/roles/software-engineer.md"]
+prompt = """
+!{cat docs/ai/roles/software-engineer.md}
+
+Você é o Software Engineer conforme definido acima. Priorize a menor mudança correta e o estilo idiomático do framework.
+"""

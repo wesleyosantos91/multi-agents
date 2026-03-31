@@ -87,9 +87,9 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 
 | Arquivo | Funcao |
 |---------|--------|
-| `CLAUDE.md` | Documento de governanca lido automaticamente pelo Claude Code. Define stack, regras arquiteturais, checklists transversais e ordem de consulta dos agentes. Todo agente respeita o que esta aqui. |
-| `.claude/settings.json` | Configura o `staff-engineer-orchestrator` como agente padrao do projeto. Quando voce abre o Claude Code neste repo, ele ja sabe qual agente usar. |
-| `.claude/agents/*.md` | Cada arquivo define um agente com: papel, escopo, regras, checklist e formato de saida obrigatorio. |
+| `CLAUDE.md` | Documento de governanca lido automaticamente pelo Claude Code. Define stack, regras arquiteturais, checklists transversais e ordem de consulta dos agentes. **E aqui que o `staff-engineer-orchestrator` e definido como agente padrao** — a instrucao "toda demanda nao trivial deve passar pelo orquestrador" e lida e seguida pelo Claude automaticamente. |
+| `.claude/settings.json` | Configuracoes do Claude Code para o projeto: permissoes de ferramentas, hooks, variaveis de ambiente. Nao define o agente padrao — isso e responsabilidade do `CLAUDE.md`. |
+| `.claude/agents/*.md` | Cada arquivo define um agente com: papel, escopo, regras, checklist e formato de saida obrigatorio. O campo `description` de cada arquivo e o **gatilho** que o Claude usa para selecionar automaticamente qual agente invocar. |
 
 ---
 
@@ -216,15 +216,27 @@ Orchestrator:
 
 #### Exemplo 4: Acionar agente especifico diretamente
 
-Se voce sabe que precisa apenas de uma perspectiva, pode acionar o agente diretamente no Claude Code:
+Se voce sabe que precisa apenas de uma perspectiva, instrua o Claude Code em linguagem natural para usar um agente especifico:
 
 ```
-Voce: @security-reviewer Revise a configuracao de autenticacao
-      do endpoint /api/v1/payments
+Voce: Usando o security-reviewer, revise a configuracao de autenticacao
+      do endpoint /api/v1/payments.
 
   → Somente o security-reviewer analisa
   → Resposta focada em seguranca
 ```
+
+Ou instrua o orquestrador a consultar apenas os especialistas relevantes:
+
+```
+Voce: Quero apenas a visao de seguranca e performance sobre o consumer Kafka
+      de pagamentos. Nao preciso de analise completa.
+
+  → Orquestrador aciona somente security-reviewer e performance-reliability-reviewer
+  → Resposta mais rapida e focada
+```
+
+> **Nota**: Sub-agentes no Claude Code nao tem sintaxe especial como `@nome`. Voce os aciona referenciando o nome do agente no texto da mensagem ou deixando o orquestrador decidir automaticamente com base no campo `description` de cada agente.
 
 ---
 
@@ -249,7 +261,7 @@ model: sonnet
 | Campo | Descricao |
 |-------|-----------|
 | `name` | Identificador unico do agente. Usado para referencia e invocacao. |
-| `description` | Descricao curta exibida no Claude Code. |
+| `description` | **Campo critico.** O Claude Code usa esse campo para decidir automaticamente quando invocar o agente. Uma descricao clara com condicoes de uso ("use para X, Y, Z") melhora a selecao automatica. Descricoes vagas reduzem a chance de o agente ser acionado corretamente. |
 | `tools` | Lista de ferramentas que o agente pode usar. Controla o que ele pode fazer. |
 | `model` | Modelo Claude a ser usado (`opus`, `sonnet`, `haiku`). |
 
@@ -404,6 +416,8 @@ Problemas que impedem uso por usuarios com deficiencia.
 ### 3. Melhorias recomendadas
 Acoes com prioridade.
 ```
+
+> **Lembre-se**: apos criar o arquivo, siga os Passos 4 e 5 acima para registrar o agente no `staff-engineer-orchestrator.md` e no `CLAUDE.md`. Sem isso, o agente existe mas nunca sera chamado pelo orquestrador.
 
 ---
 

@@ -1,3 +1,6 @@
 description = "Consulta o Performance Reliability Reviewer sobre throughput, contenção e escala"
-systemPrompt = "Você é o Performance / Reliability Reviewer. Analise contenção de recursos, throughput, GC behavior e latência."
-context = ["docs/ai/roles/performance-reliability-reviewer.md"]
+prompt = """
+!{cat docs/ai/roles/performance-reliability-reviewer.md}
+
+Você é o Performance / Reliability Reviewer conforme definido acima. Analise contenção de recursos, throughput, GC behavior e latência.
+"""
