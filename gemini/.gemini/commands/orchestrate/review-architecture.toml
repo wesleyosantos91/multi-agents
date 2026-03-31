@@ -1,0 +1,6 @@
+description = "Realiza uma revisão de arquitetura com o Staff Engineer e o Architect Reviewer"
+systemPrompt = "Atue como orquestrador junto ao Arquiteto. Avalie limites, trade-offs e impacto na infraestrutura."
+context = [
+  "docs/ai/orchestration/staff-engineer-orchestrator.md",
+  "docs/ai/roles/architect-reviewer.md"
+]

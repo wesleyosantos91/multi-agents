@@ -1,185 +1,99 @@
-# Multi-Agent Orchestration para Google Gemini
+# Multi-Agent Orchestration para Google Gemini CLI
 
-## O que e isso?
+## O que é isso?
 
-Uma estrutura de **orquestracao por papeis virtuais** para o [Google Gemini](https://gemini.google.com/) (Gemini Code Assist / Gemini em IDEs) que simula um **time de engenharia completo** via documentacao versionada no repositorio.
+Uma estrutura de **orquestração por papéis virtuais** nativa para o [Gemini CLI](https://github.com/google/gemini-cli) que transforma o seu terminal em um **time de engenharia completo**.
 
-Em vez de um unico prompt generico, voce tem **10 papeis especializados** documentados — cada um com escopo, regras, checklist e formato de saida — coordenados por um **orquestrador** (`staff-engineer-orchestrator`).
-
----
-
-## Como funciona no Gemini
-
-O Gemini (Code Assist, Studio, ou integracoes em IDEs) nao tem sub-agentes nativos. A orquestracao e feita por **instrucoes versionadas** que voce referencia no prompt:
-
-| Arquivo | Funcao |
-|---------|--------|
-| `docs/ai/gemini-instructions.md` | Instrucoes globais — cole como system instruction ou referencia |
-| `docs/ai/orchestration/*.md` | Orquestrador principal |
-| `docs/ai/roles/*.md` | Papeis especializados |
-
-### Diferenca entre plataformas
-
-| Aspecto | Claude Code | Codex | Copilot | Gemini |
-|---------|------------|-------|---------|--------|
-| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` | `.github/copilot-instructions.md` | `docs/ai/gemini-instructions.md` |
-| Agentes/roles | `.claude/agents/*.md` | `skills/*/SKILL.md` | `docs/ai/roles/*.md` | `docs/ai/roles/*.md` |
-| Sub-agentes | `Agent(...)` nativo | Leitura sequencial | Referencia no prompt | Referencia no prompt |
-| Modelo por agente | Frontmatter YAML | Runtime do Codex | Nao configuravel | Nao configuravel |
-| Orquestracao | Automatica | Semi-automatica | Manual via prompt | Manual via prompt |
+O repositório utiliza o conceito de **Contexto Persistente** e **Comandos Customizados** para que o Gemini atue como um **Staff Engineer Orchestrator**, capaz de invocar especialistas para revisões de segurança, arquitetura, dados e implementação.
 
 ---
 
-## Estrutura
+## Estrutura de Orquestração Nativa
 
-```
-gemini/
-├── docs/ai/
-│   ├── gemini-instructions.md                             # Instrucoes globais
-│   ├── orchestration/
-│   │   └── staff-engineer-orchestrator.md                 # Maestro principal
-│   └── roles/
-│       ├── tech-lead-reviewer.md                          # Pragmatismo
-│       ├── architect-reviewer.md                          # Arquitetura
-│       ├── api-contract-reviewer.md                       # Contratos de borda
-│       ├── security-reviewer.md                           # Seguranca
-│       ├── ad-dba-reviewer.md                             # Dados
-│       ├── software-engineer.md                           # Implementacao
-│       ├── sre-platform-engineer.md                       # Operabilidade
-│       ├── qa-quality-engineer.md                         # Testes
-│       └── performance-reliability-reviewer.md            # Performance
-└── README.md
-```
+A estrutura atual segue o padrão oficial do Gemini CLI:
+
+| Componente | Arquivo / Pasta | Função |
+| :--- | :--- | :--- |
+| **Constituição** | `GEMINI.md` | Define o comportamento global e a persona do Orquestrador. |
+| **Configuração** | `.gemini/settings.json` | Configurações do projeto e metadados. |
+| **Comandos (Agentes)** | `.gemini/commands/` | Atalhos TOML que invocam papéis especializados. |
+| **Base de Conhecimento** | `docs/ai/` | Documentação técnica que serve de contexto para os agentes. |
 
 ---
 
-## Papeis disponiveis
+## Como Usar no Gemini CLI
 
-| # | Papel | Foco |
-|---|-------|------|
-| 0 | `staff-engineer-orchestrator` | Maestro — coordena, consolida, plano final (16 secoes) |
-| 1 | `tech-lead-reviewer` | Pragmatismo, simplicidade |
-| 2 | `architect-reviewer` | Boundaries, resiliencia, contratos |
-| 3 | `api-contract-reviewer` | OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI |
-| 4 | `security-reviewer` | Seguranca, hardening |
-| 5 | `ad-dba-reviewer` | Dados, modelagem, queries |
-| 6 | `software-engineer` | Implementacao minima |
-| 7 | `sre-platform-engineer` | Operabilidade, IaC |
-| 8 | `qa-quality-engineer` | Testes, edge cases |
-| 9 | `performance-reliability-reviewer` | Throughput, latencia |
+Com o Gemini CLI instalado e configurado no repositório, você tem acesso imediato à orquestração.
 
----
+### 1. Orquestração Principal (Default)
+Ao iniciar uma conversa normal, o Gemini já lê o `GEMINI.md` e assume o papel de **Staff Engineer Orchestrator**. Ele coordena a visão geral e planeja as mudanças.
 
-## Como usar
+### 2. Comandos Multiagente (Especialistas)
+Você pode invocar especialistas diretamente para tarefas específicas usando a sintaxe `/comando`:
 
-### Opcao 1: Gemini Code Assist (IDE)
+| Comando | Papel | Quando usar |
+| :--- | :--- | :--- |
+| `/upgrade-plan` | **Orchestrator** | Criar planos complexos de refatoração ou migração. |
+| `/review-architecture` | **Architect** | Revisar limites de sistema, resiliência e trade-offs. |
+| `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
+| `/security-reviewer` | **Security** | Validar vulnerabilidades, auth e hardening. |
+| `/ad-dba-reviewer` | **DBA** | Revisar modelagem de dados, queries e índices. |
+| `/sre-platform-engineer`| **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
+| `/tech-lead-reviewer` | **Tech Lead** | Validar simplicidade e evitar débitos técnicos. |
 
-No chat do Gemini dentro da IDE, cole o conteudo de `docs/ai/gemini-instructions.md` como contexto inicial ou referencia o arquivo:
-
-```
-Leia o arquivo docs/ai/gemini-instructions.md como suas instrucoes base.
-Depois siga docs/ai/orchestration/staff-engineer-orchestrator.md como papel
-principal. Consulte os papeis em docs/ai/roles/ conforme a ordem definida.
-Consolide a resposta no formato de saida obrigatorio do orquestrador (16 secoes).
-
-Demanda: Preciso adicionar um endpoint REST para consulta de pedidos
-com paginacao, filtro por status e ordenacao por data.
-```
-
-### Opcao 2: Google AI Studio
-
-1. Em **System Instructions**, cole o conteudo de `gemini-instructions.md`
-2. No prompt, referencia o orquestrador e a demanda
-3. Anexe os arquivos de roles como contexto se necessario
-
-### Opcao 3: Gemini API (programatica)
-
-```python
-import google.generativeai as genai
-
-# Leia as instrucoes
-with open("docs/ai/gemini-instructions.md") as f:
-    system_instruction = f.read()
-
-with open("docs/ai/orchestration/staff-engineer-orchestrator.md") as f:
-    orchestrator = f.read()
-
-model = genai.GenerativeModel(
-    model_name="gemini-2.0-flash",
-    system_instruction=system_instruction
-)
-
-response = model.generate_content(
-    f"Atue como: {orchestrator}\n\nDemanda: ..."
-)
-```
-
----
-
-## Analise focada (papel especifico)
-
-```
-Leia docs/ai/gemini-instructions.md como instrucoes base.
-Depois atue como docs/ai/roles/security-reviewer.md e revise
-a configuracao de autenticacao do endpoint /api/v1/payments.
-```
-
-## Implementacao direta (tarefa trivial)
-
-```
-Leia docs/ai/gemini-instructions.md como instrucoes base.
-Depois atue como docs/ai/roles/software-engineer.md e corrija
-o typo no campo "stauts" para "status" na entity Order.
-```
-
----
-
-## Como criar um novo papel
-
-### 1. Crie o arquivo
+#### Exemplos de Uso no Terminal:
 
 ```bash
-touch docs/ai/roles/meu-novo-papel.md
+# Pedir uma revisão de segurança focada
+/security-reviewer "Revise a lógica de JWT no Controller de autenticação"
+
+# Solicitar um plano de arquitetura para um novo microsserviço
+/review-architecture "Desenhe a integração assíncrona entre o Checkout e o Estoque"
+
+# Pedir código seguindo os padrões do projeto
+/software-engineer "Crie o repositório JPA para a entidade Order com suporte a paginação"
 ```
-
-### 2. Escreva o conteudo
-
-```markdown
-# Nome do Papel
-
-**Papel:** Descricao curta.
 
 ---
 
-## Escopo de revisao
-- Item 1
-- Item 2
+## Ordem de Consulta (Workflow)
 
-## Regras mandatorias
-- Regra 1
-- Regra 2
-
-## Checklist
-- [ ] Check 1?
-- [ ] Check 2?
-
-## Formato de saida obrigatorio
-### 1. Secao 1
-### 2. Secao 2
-```
-
-### 3. Registre no orquestrador e nas instrucoes globais
-
-Adicione na ordem de consulta do `staff-engineer-orchestrator.md` e no `gemini-instructions.md`.
+O Orquestrador segue esta ordem lógica de raciocínio (definida em `docs/ai/orchestration/`):
+1. **Diagnóstico Inicial** da demanda.
+2. **Consulta aos Especialistas** pertinentes (Tech Lead -> Architect -> Security -> ...).
+3. **Resolução de Conflitos** entre recomendações técnicas.
+4. **Plano Final Priorizado** e entrega do código/documentação.
 
 ---
 
-## Portabilidade
+## Estrutura do Repositório
 
-Para usar em outro repositorio:
+```text
+gemini/
+├── GEMINI.md                                              # Regras e Persona Principal
+├── .gemini/
+│   ├── settings.json                                      # Configuração do CLI
+│   └── commands/                                          # Definição dos Comandos (Agentes)
+│       ├── orchestrate/                                   # Comandos de Fluxo
+│       └── roles/                                         # Comandos de Especialistas
+└── docs/ai/
+    ├── orchestration/                                     # Lógica do Staff Engineer
+    └── roles/                                             # Detalhamento de cada Papel (MD)
+```
 
-1. Copie `docs/ai/` para o novo repo
-2. Adapte stack e regras em `gemini-instructions.md`
-3. Ajuste papeis conforme necessario
+---
 
-Placeholders `<project-root>/` e `<base-package>/` facilitam o reuso.
+## Como Adicionar um Novo Especialista
+
+1. **Crie a documentação:** Adicione um arquivo `.md` em `docs/ai/roles/` com o escopo e regras do papel.
+2. **Crie o comando:** Adicione um arquivo `.toml` em `.gemini/commands/roles/` referenciando o arquivo `.md` no campo `context`.
+3. **Registre:** Adicione o novo comando na lista de comandos do `GEMINI.md`.
+
+---
+
+## Portabilidade para outros Projetos
+
+Para levar essa inteligência para outro repositório:
+1. Copie as pastas `.gemini/` e `docs/ai/`.
+2. Copie o arquivo `GEMINI.md`.
+3. Ajuste as referências de stack tecnológica no `GEMINI.md` e nos arquivos de `docs/ai/`.

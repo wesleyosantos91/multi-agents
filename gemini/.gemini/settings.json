@@ -1,0 +1,6 @@
+{
+  "project": {
+    "name": "gemini-multi-agents",
+    "description": "Repositório com papéis especialistas configurados para orquestração pelo Gemini CLI"
+  }
+}

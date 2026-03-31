@@ -1,16 +1,16 @@
 # Multi-Agent Governance para Codex
 
-## Estado real do modulo
+## O que este repositorio e
 
 Este repositorio **nao contem uma aplicacao Java executavel** (nao ha `src/`, `pom.xml`, `build.gradle` ou pipeline de build).
 
-O modulo atual e um **kit de governanca multiagente** para o Codex, composto por:
+Ele e um **kit de governanca multiagente** para o Codex, composto por:
 
 - `AGENTS.md`: regras globais do projeto (papel padrao, stack-alvo, checklists e disciplina operacional).
-- `.agents/skills/*/SKILL.md`: definicao das skills especializadas.
-- `.codex/config.toml` e `.codex/agents/*.toml`: configuracao de agentes do runtime (modelo, sandbox e instrucoes).
+- `.agents/skills/*/SKILL.md`: definicao de cada skill especializada.
+- `.codex/config.toml` e `.codex/agents/*.toml`: configuracao de runtime dos agentes (modelo, sandbox e instrucoes).
 
-## Estrutura atual do repositorio
+## Estrutura atual
 
 ```text
 .
@@ -58,28 +58,69 @@ Total atual: **10 skills**.
 9. `qa-quality-engineer`
 10. `performance-reliability-reviewer`
 
-## Como usar no dia a dia
+## Como utilizar multiagents no dia a dia
 
-1. Abra este repositorio no Codex.
-2. Deixe o `AGENTS.md` guiar o comportamento global.
-3. Para demanda nao trivial, inicie com o papel `staff-engineer-orchestrator`.
-4. Para demanda pontual, solicite diretamente a skill especializada.
+### Fluxo recomendado (demanda nao trivial)
 
-Exemplo:
+1. Passe o contexto completo da demanda.
+2. Inicie pelo `staff-engineer-orchestrator`.
+3. Exija consulta das skills relevantes antes de implementar.
+4. Implemente somente apos plano consolidado.
+
+Exemplo de prompt:
+
+```text
+Atue como staff-engineer-orchestrator seguindo AGENTS.md.
+
+Demanda:
+- Revisar e propor mudancas para resiliencia e observabilidade do fluxo de pagamentos.
+
+Requisitos:
+- Consultar skills na ordem definida em AGENTS.md.
+- Separar risco critico de melhoria futura.
+- Entregar plano final priorizado.
+- So depois propor implementacao minima segura.
+```
+
+### Fluxo direto (demanda pontual)
+
+Para atividade pequena e localizada, acione uma skill especifica:
 
 ```text
 Siga as instrucoes de .agents/skills/security-reviewer/SKILL.md
 e revise a configuracao de autenticacao do endpoint /api/v1/payments
 ```
 
+### Fluxo de implementacao apos analise
+
+Depois do plano consolidado, direcione implementacao minima:
+
+```text
+Com base no plano consolidado, atue como software-engineer e implemente
+apenas a menor mudanca correta, preservando backward compatibility.
+Liste arquivos alterados, riscos remanescentes e comandos de validacao.
+```
+
+## Verificacao rapida (se esta "certinho")
+
+Use estes comandos no PowerShell para validar estrutura e consistencia:
+
+```powershell
+Get-ChildItem .agents/skills -Directory | Select-Object -ExpandProperty Name
+Get-ChildItem .codex/agents/*.toml | Select-Object -ExpandProperty Name
+Get-Content .codex/config.toml
+```
+
+Se os nomes de skills em `.agents/skills` e `.codex/agents` estiverem alinhados, a base multiagente esta consistente.
+
 ## Como adicionar uma nova skill
 
-1. Crie o arquivo da skill em `.agents/skills/<nome>/SKILL.md`.
+1. Crie o arquivo em `.agents/skills/<nome>/SKILL.md`.
 2. Crie o agente correspondente em `.codex/agents/<nome>.toml`.
 3. Atualize a ordem de consulta no `AGENTS.md` e no `staff-engineer-orchestrator/SKILL.md` quando necessario.
 
 ## Notas de compatibilidade
 
-- O modulo ja usa a estrutura nova (`.agents/skills` + `.codex/agents`).
+- O repositorio usa a estrutura atual (`.agents/skills` + `.codex/agents`).
 - Se encontrar referencia textual a `codex/skills/`, trate como **legado** e use `.agents/skills/`.
-- A stack de Java/AWS descrita no `AGENTS.md` e **contexto-alvo para projetos consumidores**, nao um codigo implementado neste repositorio.
+- A stack Java/AWS no `AGENTS.md` e **contexto-alvo para projetos consumidores**, nao codigo executavel neste repositorio.
