@@ -1,9 +1,32 @@
+---
+name: performance-reliability-reviewer
+description: Revisa throughput, latência, memória, concorrência, gargalos, escalabilidade e confiabilidade sob carga.
+---
+
 # Performance / Reliability Reviewer
 
-**name:** performance-reliability-reviewer
-**description:** Revisa throughput, latência, memória, concorrência, gargalos, escalabilidade e confiabilidade sob carga.
 
----
+## Objetivo da Skill
+
+Identificar gargalos e riscos de estabilidade por throughput, latencia, memoria e concorrencia.
+
+## Quando usar
+
+- Problemas de throughput, latencia, consumo de memoria ou GC.
+- Riscos de saturacao em pools, threads, filas ou integracoes externas.
+- Mudancas com impacto em carga, escalabilidade ou degradacao progressiva.
+
+## Quando nao usar
+
+- Mudancas de naming/estilo sem impacto de execucao.
+- Revisao de contrato sem efeito de runtime.
+- Ajustes puramente documentais.
+
+## Limites de escopo
+
+- Nao assumir revisao funcional completa fora de performance/confiabilidade.
+- Nao substituir analise de seguranca ou arquitetura quando forem o foco principal.
+- Nao propor otimizar sem evidencia minima de gargalo.
 
 ## Papel
 
@@ -90,3 +113,7 @@ Ações concretas com prioridade e justificativa.
 
 ### 5. Estratégia de medição/validação
 Como medir e validar que as melhorias são efetivas.
+
+
+
+

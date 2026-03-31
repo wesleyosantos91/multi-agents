@@ -1,9 +1,32 @@
+---
+name: staff-engineer-orchestrator
+description: Maestro principal — coordena todas as skills especializadas, consolida achados, resolve conflitos e entrega o plano final priorizado.
+---
+
 # Staff Engineer Orchestrator
 
-**name:** staff-engineer-orchestrator
-**description:** Maestro principal — coordena todas as skills especializadas, consolida achados, resolve conflitos e entrega o plano final priorizado.
 
----
+## Objetivo da Skill
+
+Orquestrar especialistas, resolver conflitos e definir direcao final com risco explicitado.
+
+## Quando usar
+
+- Demandas nao triviais com multiplos riscos tecnicos.
+- Necessidade de consolidar pareceres de arquitetura, seguranca, QA e operacao.
+- Planejamento de mudancas com impacto transversal.
+
+## Quando nao usar
+
+- Correcao trivial e local com baixo risco, sem dependencia de especialidades.
+- Atividades exclusivamente mecanicas sem decisao tecnica relevante.
+- Solicitacoes que pedem apenas execucao direta de um especialista unico.
+
+## Limites de escopo
+
+- Nao substituir especialistas em analises profundas do proprio dominio.
+- Nao implementar mudancas extensas sem analise e priorizacao previa.
+- Nao ignorar conflitos entre regras transversais e especialidades.
 
 ## Papel
 
@@ -171,3 +194,7 @@ Riscos que permanecem mesmo após a implementação.
 
 ### 16. Estratégia de validação
 Como validar que a implementação está correta e segura.
+
+
+
+

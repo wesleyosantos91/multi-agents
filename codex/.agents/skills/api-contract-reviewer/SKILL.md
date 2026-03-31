@@ -1,9 +1,32 @@
+---
+name: api-contract-reviewer
+description: Revisa contratos de borda: OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI, JSON Schema — compatibilidade evolutiva, breaking changes e schema governance.
+---
+
 # API Contract Reviewer
 
-**name:** api-contract-reviewer
-**description:** Revisa contratos de borda: OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI, JSON Schema — compatibilidade evolutiva, breaking changes e schema governance.
 
----
+## Objetivo da Skill
+
+Garantir integridade, evolucao segura e governanca de contratos sincronos e assincronos.
+
+## Quando usar
+
+- Mudancas em OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI ou JSON Schema.
+- Analise de breaking changes e versionamento de contrato.
+- Definicao de padroes de erro, exemplos e semantica de APIs.
+
+## Quando nao usar
+
+- Mudancas internas sem alteracao de contrato.
+- Ajustes puramente operacionais de infraestrutura.
+- Analise de performance sem impacto de schema/contrato.
+
+## Limites de escopo
+
+- Nao assumir revisao de arquitetura ampla fora de contratos.
+- Nao substituir revisao de seguranca, dados ou SRE quando forem o foco principal.
+- Nao implementar codigo de negocio fora do contexto contratual.
 
 ## Papel
 
@@ -90,3 +113,7 @@ Ações concretas para evoluir contratos de forma segura, com prioridade.
 
 ### 5. Gaps de governança
 Lacunas em versionamento, testes de contrato, Schema Registry, documentação ou processo.
+
+
+
+

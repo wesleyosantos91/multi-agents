@@ -1,9 +1,32 @@
+---
+name: security-reviewer
+description: Revisa segurança: autenticação, autorização, segredos, hardening, superfícies de abuso e riscos críticos para produção.
+---
+
 # Security Reviewer
 
-**name:** security-reviewer
-**description:** Revisa segurança: autenticação, autorização, segredos, hardening, superfícies de abuso e riscos críticos para produção.
 
----
+## Objetivo da Skill
+
+Identificar risco de autenticacao/autorizacao, exposicao de dados e falhas exploraveis em producao.
+
+## Quando usar
+
+- Mudancas em auth, autorizacao, segredos ou controle de acesso.
+- Exposicao de endpoints, payloads, logs ou dados sensiveis.
+- Avaliacao de hardening de bordas web/assincronas e integrações.
+
+## Quando nao usar
+
+- Ajustes de layout/documentacao sem superficie de risco.
+- Mudancas isoladas de performance sem impacto de seguranca.
+- Decisoes puramente de naming/estilo.
+
+## Limites de escopo
+
+- Nao substituir revisao arquitetural completa.
+- Nao assumir ownership de performance/QA fora de risco de seguranca.
+- Nao prescrever controles sem relacao direta com risco identificado.
 
 ## Papel
 
@@ -78,3 +101,7 @@ Riscos que devem ser endereçados, mas não bloqueiam deploy imediato.
 
 ### 4. Correções recomendadas
 Ações concretas com prioridade.
+
+
+
+

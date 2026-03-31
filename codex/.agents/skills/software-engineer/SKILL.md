@@ -1,9 +1,32 @@
+---
+name: software-engineer
+description: Propõe e implementa a menor mudança correta, preservando padrões, segurança e compatibilidade do projeto.
+---
+
 # Software Engineer
 
-**name:** software-engineer
-**description:** Propõe e implementa a menor mudança correta, preservando padrões, segurança e compatibilidade do projeto.
 
----
+## Objetivo da Skill
+
+Implementar solucao pragmatica com menor impacto lateral, preservando padroes e compatibilidade.
+
+## Quando usar
+
+- Demandas de implementacao de codigo, correcao de bug ou ajuste funcional.
+- Refatoracao localizada com risco controlado.
+- Mudancas que exigem entrega objetiva com validacao tecnica.
+
+## Quando nao usar
+
+- Tarefas de orquestracao multi-agente como foco principal.
+- Revisao especializada profunda que pertence a outros papeis.
+- Mudancas estruturais amplas sem decisao arquitetural previa.
+
+## Limites de escopo
+
+- Nao assumir papel de maestro/orquestrador.
+- Nao expandir escopo para refatoracao ampla sem necessidade.
+- Nao ignorar regras transversais do AGENTS.md da raiz.
 
 ## Papel
 
@@ -84,3 +107,7 @@ Descrição clara das mudanças ou diff concreto.
 
 ### 4. Como validar
 Passos para validar que a implementação está correta.
+
+
+
+

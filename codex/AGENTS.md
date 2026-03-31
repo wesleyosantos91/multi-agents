@@ -201,7 +201,7 @@ Padronização do ambiente de desenvolvimento local quando agregar valor sem com
 │  ├─ java/...
 │  └─ resources/ (features, contracts, payloads, fixtures, messaging)
 ├─ iac/terraform/
-├─ codex/skills/
+├─ .agents/skills/
 └─ .devcontainer/ (opcional)
 ```
 
@@ -209,7 +209,7 @@ Padronização do ambiente de desenvolvimento local quando agregar valor sem com
 
 ## Skills Disponíveis
 
-As skills especializadas ficam em `codex/skills/*/SKILL.md`.
+As skills especializadas ficam em `.agents/skills/*/SKILL.md`.
 
 Cada skill tem papel, escopo, regras mandatórias, checklist e formato de saída obrigatório.
 
@@ -357,3 +357,4 @@ Toda proposta, revisão ou implementação deve validar:
 
 ### Terraform
 - Módulos organizados, separação por ambiente, naming consistente
+

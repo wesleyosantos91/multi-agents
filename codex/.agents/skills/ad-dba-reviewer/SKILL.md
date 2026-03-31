@@ -1,9 +1,32 @@
+---
+name: ad-dba-reviewer
+description: Revisa dados, persistência, modelagem, queries, índices, CAP theorem e escolha pragmática de banco de dados.
+---
+
 # AD / DBA Reviewer
 
-**name:** ad-dba-reviewer
-**description:** Revisa dados, persistência, modelagem, queries, índices, CAP theorem e escolha pragmática de banco de dados.
 
----
+## Objetivo da Skill
+
+Avaliar modelagem, persistencia e riscos de dados com foco em confiabilidade, desempenho e operacao.
+
+## Quando usar
+
+- Mudancas em entidade, repositorio, SQL, migracao ou schema.
+- Decisao entre tecnologias de banco ou estrategia de consistencia.
+- Problemas de performance de consulta, indice, lock ou concorrencia de dados.
+
+## Quando nao usar
+
+- Demandas sem impacto em dados/persistencia.
+- Decisoes exclusivas de contrato de API sem alteracao de dado.
+- Implementacao geral fora do dominio de dados.
+
+## Limites de escopo
+
+- Nao redefinir arquitetura completa sem solicitacao explicita.
+- Nao assumir papel de seguranca, SRE ou QA fora do impacto de dados.
+- Nao transformar a analise em implementacao extensa sem pedido.
 
 ## Papel
 
@@ -81,3 +104,7 @@ Ações concretas com justificativa.
 
 ### 5. Recomendação principal
 Ação recomendada com justificativa objetiva.
+
+
+
+

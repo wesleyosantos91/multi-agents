@@ -1,162 +1,85 @@
-# Multi-Agent Orchestration para Codex
+# Multi-Agent Governance para Codex
 
-## O que e isso?
+## Estado real do modulo
 
-Uma estrutura de **orquestracao multiagente** para o [OpenAI Codex](https://openai.com/index/openai-codex/) que simula um **time de engenharia completo** operando via `AGENTS.md` e skills reutilizaveis.
+Este repositorio **nao contem uma aplicacao Java executavel** (nao ha `src/`, `pom.xml`, `build.gradle` ou pipeline de build).
 
-Em vez de um unico agente fazendo tudo, voce tem **10 skills especializadas** — cada uma com papel, escopo, checklist e formato de saida definidos — coordenadas por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
+O modulo atual e um **kit de governanca multiagente** para o Codex, composto por:
 
----
+- `AGENTS.md`: regras globais do projeto (papel padrao, stack-alvo, checklists e disciplina operacional).
+- `.agents/skills/*/SKILL.md`: definicao das skills especializadas.
+- `.codex/config.toml` e `.codex/agents/*.toml`: configuracao de agentes do runtime (modelo, sandbox e instrucoes).
 
-## Como funciona no Codex
+## Estrutura atual do repositorio
 
-O Codex opera via arquivos de instrucao persistentes no repositorio:
-
-| Arquivo | Funcao |
-|---------|--------|
-| `AGENTS.md` | Documento de governanca lido automaticamente pelo Codex. Define stack, regras, checklists e ordem de consulta. |
-| `codex/skills/*/SKILL.md` | Cada skill define um papel especializado com escopo, regras e formato de saida. |
-
-### Diferenca para Claude Code
-
-| Aspecto | Claude Code | Codex |
-|---------|------------|-------|
-| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` |
-| Agentes/skills | `.claude/agents/*.md` (frontmatter YAML) | `codex/skills/*/SKILL.md` (metadata em texto) |
-| Configuracao | `.claude/settings.json` | `AGENTS.md` (inline) |
-| Invocacao de sub-agentes | `Agent(...)` tool nativa | Leitura sequencial das skills pelo orquestrador |
-| Modelo por agente | Configuravel no frontmatter | Definido pelo runtime do Codex |
-
----
-
-## Estrutura do repositorio
-
-```
-codex/
-├── AGENTS.md                                           # Governanca do projeto
-├── README.md                                           # Este arquivo
-└── skills/
-    ├── staff-engineer-orchestrator/SKILL.md             # Maestro principal
-    ├── tech-lead-reviewer/SKILL.md                      # Pragmatismo e manutenibilidade
-    ├── architect-reviewer/SKILL.md                      # Arquitetura e boundaries
-    ├── api-contract-reviewer/SKILL.md                   # Contratos de borda e schema governance
-    ├── security-reviewer/SKILL.md                       # Seguranca e hardening
-    ├── ad-dba-reviewer/SKILL.md                         # Dados e persistencia
-    ├── software-engineer/SKILL.md                       # Implementacao
-    ├── sre-platform-engineer/SKILL.md                   # Operabilidade e plataforma
-    ├── qa-quality-engineer/SKILL.md                     # Testes e qualidade
-    └── performance-reliability-reviewer/SKILL.md        # Performance e confiabilidade
+```text
+.
+├── AGENTS.md
+├── README.md
+├── .agents/
+│   └── skills/
+│       ├── staff-engineer-orchestrator/SKILL.md
+│       ├── tech-lead-reviewer/SKILL.md
+│       ├── architect-reviewer/SKILL.md
+│       ├── api-contract-reviewer/SKILL.md
+│       ├── security-reviewer/SKILL.md
+│       ├── ad-dba-reviewer/SKILL.md
+│       ├── software-engineer/SKILL.md
+│       ├── sre-platform-engineer/SKILL.md
+│       ├── qa-quality-engineer/SKILL.md
+│       └── performance-reliability-reviewer/SKILL.md
+└── .codex/
+    ├── config.toml
+    └── agents/
+        ├── staff-engineer-orchestrator.toml
+        ├── tech-lead-reviewer.toml
+        ├── architect-reviewer.toml
+        ├── api-contract-reviewer.toml
+        ├── security-reviewer.toml
+        ├── ad-dba-reviewer.toml
+        ├── software-engineer.toml
+        ├── sre-platform-engineer.toml
+        ├── qa-quality-engineer.toml
+        └── performance-reliability-reviewer.toml
 ```
 
----
+## Skills ativas
 
-## Skills disponiveis
+Total atual: **10 skills**.
 
-| # | Skill | Papel |
-|---|-------|-------|
-| 0 | `staff-engineer-orchestrator` | Maestro — coordena, consolida, resolve conflitos, entrega plano final (16 secoes) |
-| 1 | `tech-lead-reviewer` | Pragmatismo, simplicidade, custo de manutencao |
-| 2 | `architect-reviewer` | Boundaries, acoplamento, resiliencia, contratos |
-| 3 | `api-contract-reviewer` | Contratos de borda (OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI) |
-| 4 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
-| 5 | `ad-dba-reviewer` | Dados, modelagem, queries, indices, CAP theorem |
-| 6 | `software-engineer` | Implementacao minima correta |
-| 7 | `sre-platform-engineer` | Operabilidade, deploy, observabilidade, IaC |
-| 8 | `qa-quality-engineer` | Testes (JUnit 5, PIT, ArchUnit, Testcontainers), edge cases |
-| 9 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
+1. `staff-engineer-orchestrator`
+2. `tech-lead-reviewer`
+3. `architect-reviewer`
+4. `api-contract-reviewer`
+5. `security-reviewer`
+6. `ad-dba-reviewer`
+7. `software-engineer`
+8. `sre-platform-engineer`
+9. `qa-quality-engineer`
+10. `performance-reliability-reviewer`
 
----
+## Como usar no dia a dia
 
-## Ordem de consulta
+1. Abra este repositorio no Codex.
+2. Deixe o `AGENTS.md` guiar o comportamento global.
+3. Para demanda nao trivial, inicie com o papel `staff-engineer-orchestrator`.
+4. Para demanda pontual, solicite diretamente a skill especializada.
 
-O orquestrador segue esta ordem preferencial:
+Exemplo:
 
-1. tech-lead-reviewer
-2. architect-reviewer
-3. api-contract-reviewer
-4. security-reviewer
-5. ad-dba-reviewer
-6. software-engineer
-7. sre-platform-engineer
-8. qa-quality-engineer
-9. performance-reliability-reviewer
-
----
-
-## Como usar
-
-### No Codex
-
-1. O Codex le `AGENTS.md` automaticamente ao operar neste repositorio
-2. Para demandas nao triviais, instrua o Codex a seguir o papel de `staff-engineer-orchestrator`
-3. O orquestrador aplica cada skill relevante e consolida a resposta
-
-### Uso direto de uma skill
-
-Para analise focada, instrua o Codex a seguir uma skill especifica:
-
-```
-Siga as instrucoes de codex/skills/security-reviewer/SKILL.md
+```text
+Siga as instrucoes de .agents/skills/security-reviewer/SKILL.md
 e revise a configuracao de autenticacao do endpoint /api/v1/payments
 ```
 
----
+## Como adicionar uma nova skill
 
-## Como criar uma nova skill
+1. Crie o arquivo da skill em `.agents/skills/<nome>/SKILL.md`.
+2. Crie o agente correspondente em `.codex/agents/<nome>.toml`.
+3. Atualize a ordem de consulta no `AGENTS.md` e no `staff-engineer-orchestrator/SKILL.md` quando necessario.
 
-### 1. Crie o diretorio e arquivo
+## Notas de compatibilidade
 
-```bash
-mkdir -p codex/skills/minha-nova-skill
-touch codex/skills/minha-nova-skill/SKILL.md
-```
-
-### 2. Escreva o SKILL.md
-
-```markdown
-# Nome da Skill
-
-**name:** minha-nova-skill
-**description:** Descricao curta e objetiva.
-
----
-
-## Papel
-O que essa skill faz.
-
-## Escopo de revisao
-- Item 1
-- Item 2
-
-## Regras mandatorias
-- Regra 1
-- Regra 2
-
-## Checklist de revisao
-- [ ] Check 1?
-- [ ] Check 2?
-
-## Formato de saida obrigatorio
-
-### 1. Secao 1
-Descricao.
-
-### 2. Secao 2
-Descricao.
-```
-
-### 3. Registre no orquestrador e no AGENTS.md (se necessario)
-
-Adicione a nova skill na ordem de consulta do `staff-engineer-orchestrator/SKILL.md` e na lista do `AGENTS.md`.
-
----
-
-## Portabilidade
-
-Esta estrutura e **agnositca ao nome do projeto**. Para usar em outro repositorio:
-
-1. Copie `AGENTS.md` e a pasta `codex/skills/` para o novo repo
-2. Adapte stack e regras no `AGENTS.md`
-3. Ajuste as skills conforme necessario
-
-Os placeholders `<project-root>/` e `<base-package>/` facilitam o reuso.
+- O modulo ja usa a estrutura nova (`.agents/skills` + `.codex/agents`).
+- Se encontrar referencia textual a `codex/skills/`, trate como **legado** e use `.agents/skills/`.
+- A stack de Java/AWS descrita no `AGENTS.md` e **contexto-alvo para projetos consumidores**, nao um codigo implementado neste repositorio.
