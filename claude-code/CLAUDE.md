@@ -15,14 +15,18 @@ O orquestrador consulta os especialistas, consolida achados, resolve conflitos e
 
 | Camada | Tecnologias |
 |--------|------------|
-| Linguagem | Java 25 |
-| Frameworks | Spring Boot, Quarkus, Micronaut |
-| Cloud | AWS |
+| Linguagens | Java 25 · Python · Go |
+| Frameworks Java | Spring Boot, Quarkus, Micronaut |
+| Python | pyproject.toml, src layout, pytest, Ruff |
+| Go | go.mod, cmd/internal, interfaces idiomáticas |
+| Cloud | AWS (Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
 | Emulação local | LocalStack |
 | Containerização | Docker |
 | IaC | Terraform |
 | Ambiente dev | Dev Container (opcional recomendado) |
-| Testes | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Java | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Python | pytest, fixtures, parametrize |
+| Testes Go | testing, table-driven, -race, testcontainers-go |
 
 ---
 
@@ -265,21 +269,68 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Módulos, variáveis e outputs organizados
 - [ ] Separação por ambiente quando fizer sentido
 
+### Versões de dependências
+- [ ] Versão do framework (Spring Boot, Quarkus, Micronaut) verificada via WebSearch — não por memória
+- [ ] Versão é GA (não RC, SNAPSHOT, M1, M2, Alpha, Beta)
+- [ ] Compatibilidade com Java 25 confirmada
+- [ ] Sem dependências com CVE crítico ou alto conhecidos
+- [ ] Sem dependências com EOL declarado
+
+### Compliance e proteção de dados
+- [ ] Dados pessoais mapeados (LGPD/GDPR)
+- [ ] Base legal para tratamento identificada
+- [ ] Dados pessoais ausentes de logs, traces e métricas
+- [ ] Residência de dados alinhada com região AWS (sa-east-1 para Brasil)
+- [ ] Retenção e descarte de dados pessoais definidos
+
+### FinOps (custo AWS)
+- [ ] Retenção de logs CloudWatch definida
+- [ ] Rightsizing de instâncias/containers avaliado
+- [ ] Tags de custo (cost allocation tags) nas resources Terraform
+- [ ] Sem anti-padrões de billing críticos (NAT Gateway desnecessário, logs ilimitados, etc.)
+
+### Experiência do desenvolvedor
+- [ ] Onboarding documentado (máximo 3-5 comandos para rodar localmente)
+- [ ] docker-compose sobe todos os serviços necessários
+- [ ] application-local.yml completo e funcional
+- [ ] LocalStack cobre os serviços AWS usados localmente
+
+---
+
+## Regra de Versões de Dependências
+
+**Nenhum agente pode assumir versão de dependência por memória ou knowledge cutoff.**
+
+Sempre que houver criação ou modificação de `pom.xml`, `build.gradle` ou qualquer referência a framework/dependência, o `dependency-versions-reviewer` deve ser acionado **antes** do `software-engineer`. Ele usa WebSearch para verificar a versão GA mais recente no Maven Central e sites oficiais.
+
+- Nunca usar versões RC, SNAPSHOT, M1, M2, Alpha ou Beta em sistemas críticos
+- Sempre confirmar se a versão é GA e tem suporte ativo
+- O knowledge cutoff do modelo pode estar desatualizado — WebSearch é a fonte verdade
+
 ---
 
 ## Ordem Padrão de Consulta dos Agentes
 
 O `staff-engineer-orchestrator` deve consultar os agentes nesta ordem preferencial:
 
+0. `dependency-versions-reviewer` — **OBRIGATÓRIO** quando há dependências envolvidas: valida versões GA mais recentes via WebSearch antes de qualquer implementação
 1. `tech-lead-reviewer` — pragmatismo, simplicidade, manutenibilidade
 2. `architect-reviewer` — arquitetura, boundaries, trade-offs, resiliência
 3. `api-contract-reviewer` — contratos de borda, breaking changes, schema governance
 4. `security-reviewer` — segurança, hardening, superfícies de abuso
-5. `ad-dba-reviewer` — dados, persistência, modelagem, queries
-6. `software-engineer` — implementação mínima correta
-7. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
-8. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
-9. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+5. `compliance-reviewer` — LGPD, GDPR, residência de dados, direitos do titular
+6. `ad-dba-reviewer` — dados, persistência, modelagem, queries
+7. `data-engineering-aws-architect` — *(quando há pipelines de dados, ETL/ELT, data lake, streaming, Glue, EMR, Kinesis, Athena)* decisão arquitetural de dados
+8. `java-specialist` — *(quando stack Java)* estrutura, idiomatismo, ecossistema Java 25 + framework
+8. `python-specialist` — *(quando stack Python)* estrutura, idiomatismo, ecossistema Python
+8. `go-specialist` — *(quando stack Go)* estrutura, idiomatismo, ecossistema Go
+9. `software-engineer` — implementação mínima correta (após versões validadas)
+10. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
+11. `finops-reviewer` — custo AWS, rightsizing, anti-padrões de billing
+12. `devex-reviewer` — onboarding, ambiente local, docker-compose, Dev Container (poliglota)
+13. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
+14. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+15. `tech-writer` — *(quando há mudança de comportamento, novo componente ou documentação desatualizada)* README, getting-started, testing, troubleshooting
 
 ---
 

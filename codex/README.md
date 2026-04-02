@@ -32,7 +32,7 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 
 | Ganho | Descricao |
 |-------|-----------|
-| **Cobertura ampla** | 9 perspectivas especializadas em vez de uma generica |
+| **Cobertura ampla** | 18 perspectivas especializadas em vez de uma generica |
 | **Qualidade de analise** | Cada agente tem checklist e regras mandatorias do seu dominio |
 | **Rastreabilidade** | Saida estruturada com secoes fixas — facil de auditar e comparar |
 | **Conflitos explicitos** | Quando dois agentes discordam, o orquestrador explicita e resolve |
@@ -63,48 +63,75 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 ├── .agents/
 │   └── skills/
 │       ├── staff-engineer-orchestrator/SKILL.md
+│       ├── dependency-versions-reviewer/SKILL.md
 │       ├── tech-lead-reviewer/SKILL.md
 │       ├── architect-reviewer/SKILL.md
 │       ├── api-contract-reviewer/SKILL.md
 │       ├── security-reviewer/SKILL.md
+│       ├── compliance-reviewer/SKILL.md
 │       ├── ad-dba-reviewer/SKILL.md
+│       ├── data-engineering-aws-architect/SKILL.md
+│       ├── java-specialist/SKILL.md
+│       ├── python-specialist/SKILL.md
+│       ├── go-specialist/SKILL.md
 │       ├── software-engineer/SKILL.md
 │       ├── sre-platform-engineer/SKILL.md
+│       ├── finops-reviewer/SKILL.md
+│       ├── devex-reviewer/SKILL.md
 │       ├── qa-quality-engineer/SKILL.md
-│       └── performance-reliability-reviewer/SKILL.md
+│       ├── performance-reliability-reviewer/SKILL.md
+│       └── tech-writer/SKILL.md
 └── .codex/
     ├── config.toml
     └── agents/
         ├── staff-engineer-orchestrator.toml
+        ├── dependency-versions-reviewer.toml
         ├── tech-lead-reviewer.toml
         ├── architect-reviewer.toml
         ├── api-contract-reviewer.toml
         ├── security-reviewer.toml
+        ├── compliance-reviewer.toml
         ├── ad-dba-reviewer.toml
+        ├── data-engineering-aws-architect.toml
+        ├── java-specialist.toml
+        ├── python-specialist.toml
+        ├── go-specialist.toml
         ├── software-engineer.toml
         ├── sre-platform-engineer.toml
+        ├── finops-reviewer.toml
+        ├── devex-reviewer.toml
         ├── qa-quality-engineer.toml
-        └── performance-reliability-reviewer.toml
+        ├── performance-reliability-reviewer.toml
+        └── tech-writer.toml
 ```
 
 ---
 
 ## Agentes disponíveis
 
-Total atual: **10 skills**.
+Total atual: **19 skills**.
 
 | # | Skill | Foco principal |
 |---|-------|---------------|
 | 0 | `staff-engineer-orchestrator` | Maestro — coordena, consolida, plano final |
-| 1 | `tech-lead-reviewer` | Pragmatismo, simplicidade, manutenibilidade |
-| 2 | `architect-reviewer` | Boundaries, resiliencia, contratos |
-| 3 | `api-contract-reviewer` | OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI |
-| 4 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
-| 5 | `ad-dba-reviewer` | Dados, modelagem, queries, persistencia |
-| 6 | `software-engineer` | Implementacao minima correta |
-| 7 | `sre-platform-engineer` | Operabilidade, deploy, IaC, observabilidade |
-| 8 | `qa-quality-engineer` | Testes, qualidade, edge cases, regressoes |
-| 9 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
+| 1 | `dependency-versions-reviewer` | Versoes GA via WebSearch — Java, Python, Go, AWS runtimes |
+| 2 | `tech-lead-reviewer` | Pragmatismo, simplicidade, manutenibilidade |
+| 3 | `architect-reviewer` | Boundaries, resiliencia, contratos |
+| 4 | `api-contract-reviewer` | OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI |
+| 5 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
+| 6 | `compliance-reviewer` | LGPD, GDPR, residencia de dados, serverless compliance |
+| 7 | `ad-dba-reviewer` | Dados, modelagem, queries, persistencia |
+| 8 | `data-engineering-aws-architect` | Pipelines, Glue, EMR, Kinesis, Athena — trade-offs de dados AWS |
+| 9 | `java-specialist` | Java 25, Spring Boot, Quarkus, Micronaut |
+| 10 | `python-specialist` | Python, pyproject.toml, pytest, Ruff, Lambda Python |
+| 11 | `go-specialist` | Go, go.mod, interfaces, context, table-driven tests |
+| 12 | `software-engineer` | Implementacao minima correta (poliglota) |
+| 13 | `sre-platform-engineer` | Operabilidade, deploy, IaC, observabilidade |
+| 14 | `finops-reviewer` | Custo AWS, rightsizing, anti-padroes de billing |
+| 15 | `devex-reviewer` | Onboarding, ambiente local, Dev Container (poliglota) |
+| 16 | `qa-quality-engineer` | Testes, qualidade, edge cases, regressoes |
+| 17 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
+| 18 | `tech-writer` | README, getting-started, testing, troubleshooting |
 
 ---
 
@@ -133,25 +160,32 @@ Prioridade de regras: `AGENTS.md` > `.codex/agents/*.toml` > `.agents/skills/*/S
 
 ## Como funciona tecnicamente
 
-O `staff-engineer-orchestrator` é o ponto de entrada para demandas não triviais. Sua saída segue sempre 16 seções fixas:
+O `staff-engineer-orchestrator` é o ponto de entrada para demandas não triviais. Sua saída segue sempre 23 seções fixas:
 
 ```
-1.  Diagnóstico inicial              → O que foi pedido e o contexto
-2.  Stack e módulos impactados       → Tecnologias e áreas afetadas
-3.  Achados do Tech Lead             → Pragmatismo e manutenção
-4.  Achados do Architect             → Arquitetura e boundaries
-5.  Achados do API Contract          → Contratos, breaking changes
-6.  Achados do Security              → Segurança e riscos
-7.  Achados do AD/DBA                → Dados e persistência
-8.  Achados do Software Engineer     → Implementação proposta
-9.  Achados do SRE/Platform          → Operabilidade e deploy
-10. Achados do QA/Quality            → Testes e qualidade
-11. Achados do Performance           → Performance e confiabilidade
-12. Conflitos entre recomendações    → Divergências e resolução
-13. Plano final priorizado           → Ações ordenadas por prioridade
-14. Diff sugerido                    → Mudanças concretas
-15. Riscos remanescentes             → O que ainda pode dar errado
-16. Estratégia de validação          → Como confirmar que está correto
+1.  Diagnóstico inicial                    → O que foi pedido e o contexto
+2.  Stack e módulos impactados             → Tecnologias e áreas afetadas
+3.  Versões de dependências validadas      → Via dependency-versions-reviewer (WebSearch)
+4.  Achados do Tech Lead                   → Pragmatismo e manutenção
+5.  Achados do Architect                   → Arquitetura e boundaries
+6.  Achados do API Contract                → Contratos, breaking changes
+7.  Achados do Security                    → Segurança e riscos
+8.  Achados do Compliance                  → LGPD, GDPR, residência de dados
+9.  Achados do AD/DBA                      → Dados e persistência
+10. Achados do Data Engineering            → Pipelines, ETL, streaming (quando aplicável)
+11. Achados do Language Specialist         → Java / Python / Go (conforme stack)
+12. Achados do Software Engineer           → Implementação proposta
+13. Achados do SRE/Platform                → Operabilidade e deploy
+14. Achados do FinOps                      → Custo AWS e anti-padrões de billing
+15. Achados do DevEx                       → Onboarding e ambiente local
+16. Achados do QA/Quality                  → Testes e qualidade
+17. Achados do Performance                 → Performance e confiabilidade
+18. Achados do Tech Writer                 → Documentação impactada (quando aplicável)
+19. Conflitos entre recomendações          → Divergências e resolução
+20. Plano final priorizado                 → Ações ordenadas por prioridade
+21. Diff sugerido                          → Mudanças concretas
+22. Riscos remanescentes                   → O que ainda pode dar errado
+23. Estratégia de validação                → Como confirmar que está correto
 ```
 
 Essa estrutura fixa garante rastreabilidade e completude — voce sabe de onde veio cada recomendacao.

@@ -4,7 +4,7 @@
 
 Uma estrutura de **orquestracao multiagente** para o [Claude Code](https://docs.anthropic.com/en/docs/claude-code) que simula um **time de engenharia completo** dentro do seu terminal.
 
-Em vez de um unico agente fazendo tudo, voce tem **10 agentes especializados** — cada um com papel, escopo, checklist e formato de saida definidos — coordenados por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
+Em vez de um unico agente fazendo tudo, voce tem **18 agentes especializados** — cada um com papel, escopo, checklist e formato de saida definidos — coordenados por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
 
 ### Analogia simples
 
@@ -39,13 +39,14 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 
 | Ganho | Descricao |
 |-------|-----------|
-| **Cobertura ampla** | 9 perspectivas especializadas em vez de uma generica |
+| **Cobertura ampla** | 18 perspectivas especializadas em vez de uma generica |
+| **Stack poliglota** | Suporte nativo a Java, Python, Go e AWS Serverless — cada linguagem tem especialista proprio |
 | **Qualidade de analise** | Cada agente tem checklist e regras mandatorias do seu dominio |
 | **Rastreabilidade** | Saida estruturada com secoes fixas — facil de auditar e comparar |
 | **Conflitos explicitos** | Quando dois agentes discordam, o orquestrador explicita e resolve |
 | **Priorizacao** | Plano final ordenado por prioridade com justificativa |
 | **Riscos visiveis** | Riscos remanescentes listados explicitamente |
-| **Reprodutibilidade** | Mesma estrutura de resposta toda vez, independente da demanda |
+| **Reproducibilidade** | Mesma estrutura de resposta toda vez, independente da demanda |
 | **Escalabilidade do time** | Facil adicionar novos agentes sem quebrar o fluxo |
 
 ### Trade-offs
@@ -56,7 +57,7 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 | **Custo de tokens** | Cada agente consome tokens. Demandas simples custam mais que o necessario |
 | **Complexidade inicial** | Precisa entender a estrutura antes de usar com eficiencia |
 | **Maturidade do Claude Code** | O recurso de agentes customizados ainda esta em evolucao |
-| **Overhead para tarefas simples** | Para um bugfix pontual, acionar 9 agentes e desproporcional |
+| **Overhead para tarefas simples** | Para um bugfix pontual, acionar 18 agentes e desproporcional |
 
 **Regra pratica**: use o orquestrador para demandas nao triviais. Para tarefas simples, acione diretamente o agente relevante.
 
@@ -66,21 +67,30 @@ Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que
 
 ```
 .
-├── CLAUDE.md                                    # Governanca do projeto
-├── README.md                                    # Este arquivo
+├── CLAUDE.md                                          # Governanca do projeto
+├── README.md                                          # Este arquivo
 └── .claude/
-    ├── settings.json                            # Configuracao do Claude Code
-    └── agents/                                  # Agentes especializados
+    ├── settings.json                                  # Configuracao do Claude Code
+    └── agents/                                        # Agentes especializados
         ├── staff-engineer-orchestrator.md             # Maestro principal
-        ├── tech-lead-reviewer.md                 # Pragmatismo e manutenibilidade
-        ├── architect-reviewer.md                 # Arquitetura e boundaries
-        ├── api-contract-reviewer.md              # Contratos de borda e schema governance
-        ├── security-reviewer.md                  # Seguranca e hardening
-        ├── ad-dba-reviewer.md                    # Dados e persistencia
-        ├── software-engineer.md                  # Implementacao
-        ├── sre-platform-engineer.md              # Operabilidade e plataforma
-        ├── qa-quality-engineer.md                # Testes e qualidade
-        └── performance-reliability-reviewer.md   # Performance e confiabilidade
+        ├── dependency-versions-reviewer.md            # Versoes GA de dependencias (WebSearch)
+        ├── tech-lead-reviewer.md                      # Pragmatismo e manutenibilidade
+        ├── architect-reviewer.md                      # Arquitetura e boundaries
+        ├── api-contract-reviewer.md                   # Contratos de borda e schema governance
+        ├── security-reviewer.md                       # Seguranca e hardening
+        ├── compliance-reviewer.md                     # LGPD, GDPR, compliance serverless
+        ├── ad-dba-reviewer.md                         # Dados e persistencia
+        ├── data-engineering-aws-architect.md          # Pipelines de dados, Glue, EMR, Kinesis
+        ├── java-specialist.md                         # Java 25, Spring Boot, Quarkus, Micronaut
+        ├── python-specialist.md                       # Python, pyproject.toml, pytest, Ruff
+        ├── go-specialist.md                           # Go, go.mod, interfaces, testing
+        ├── software-engineer.md                       # Implementacao minima correta
+        ├── sre-platform-engineer.md                   # Operabilidade, deploy, IaC
+        ├── finops-reviewer.md                         # Custo AWS, rightsizing, billing
+        ├── devex-reviewer.md                          # Onboarding, ambiente local, Dev Container
+        ├── qa-quality-engineer.md                     # Testes e qualidade
+        ├── performance-reliability-reviewer.md        # Performance e confiabilidade
+        └── tech-writer.md                             # Documentacao tecnica
 ```
 
 ### O que cada arquivo faz
@@ -108,13 +118,12 @@ Voce faz uma pergunta ou pede uma implementacao
                 ▼
     Aciona especialistas (em paralelo quando possivel)
                 │
-  ┌─────┬──────┼──────┬──────┬──────┬──────┬──────┬──────┐
-  ▼     ▼      ▼      ▼      ▼      ▼      ▼      ▼      ▼
-tech- archi-  api-  securi- ad-   soft-   sre-   qa-   perfor-
-lead  tect   cont-  ty     dba   ware   plat-  quali- mance
-             ract               eng    form   ty
-  │     │      │      │      │      │      │      │      │
-  └─────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
+  ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+  ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼
+dep- tech- archi- api- sec- compl- dba  java/ soft- sre  qa ...
+vers lead  tect  cont rity iance      py/go ware plat
+  │    │    │    │    │    │    │    │    │    │    │
+  └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
                 │
                 ▼
 ┌──────────────────────────────────┐
@@ -122,7 +131,7 @@ lead  tect   cont-  ty     dba   ware   plat-  quali- mance
 └───────────────┬──────────────────┘
                 │
                 ▼
-    Resposta final estruturada (16 secoes)
+    Resposta final estruturada (26 secoes)
 ```
 
 ### Ordem de consulta
@@ -131,15 +140,24 @@ O orquestrador segue esta ordem preferencial:
 
 | # | Agente | Foco |
 |---|--------|------|
+| 0 | `dependency-versions-reviewer` | Versoes GA via WebSearch — Java, Python, Go, AWS runtimes |
 | 1 | `tech-lead-reviewer` | Pragmatismo, simplicidade, custo de manutencao |
 | 2 | `architect-reviewer` | Boundaries, acoplamento, resiliencia, contratos |
 | 3 | `api-contract-reviewer` | Contratos de borda, breaking changes, schema governance |
 | 4 | `security-reviewer` | Seguranca, hardening, superficies de abuso |
-| 5 | `ad-dba-reviewer` | Dados, modelagem, queries, indices, CAP theorem |
-| 6 | `software-engineer` | Implementacao minima correta |
-| 7 | `sre-platform-engineer` | Operabilidade, deploy, observabilidade, IaC |
-| 8 | `qa-quality-engineer` | Testes, edge cases, regressoes |
-| 9 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade |
+| 5 | `compliance-reviewer` | LGPD, GDPR, residencia de dados, serverless compliance |
+| 6 | `ad-dba-reviewer` | Dados, modelagem, queries, indices, CAP theorem |
+| 7 | `data-engineering-aws-architect` | Pipelines de dados, Glue, EMR, Kinesis, Athena — trade-offs tecnico e financeiro |
+| 8 | `java-specialist` | *(quando stack Java)* Java 25, Spring Boot, Quarkus, Micronaut |
+| 8 | `python-specialist` | *(quando stack Python)* pyproject.toml, pytest, Ruff, Lambda Python |
+| 8 | `go-specialist` | *(quando stack Go)* go.mod, interfaces, context, table-driven tests |
+| 9 | `software-engineer` | Implementacao minima correta (apos versoes validadas) |
+| 10 | `sre-platform-engineer` | Operabilidade, deploy, observabilidade, IaC |
+| 11 | `finops-reviewer` | Custo AWS, rightsizing, anti-padroes de billing |
+| 12 | `devex-reviewer` | Onboarding, ambiente local, docker-compose, Dev Container |
+| 13 | `qa-quality-engineer` | Testes, qualidade, edge cases (Java, Python, Go, serverless) |
+| 14 | `performance-reliability-reviewer` | Throughput, latencia, escalabilidade, cold start |
+| 15 | `tech-writer` | Documentacao tecnica: README, getting-started, testing, troubleshooting |
 
 ---
 
@@ -155,7 +173,7 @@ O orquestrador segue esta ordem preferencial:
 ```bash
 # 1. Clone o repositorio
 git clone <repo-url>
-cd multi-agents
+cd multi-agents/claude-code
 
 # 2. Abra o Claude Code
 claude
@@ -166,44 +184,68 @@ claude
 
 ### Exemplos de uso
 
-#### Exemplo 1: Analise de uma nova feature
+#### Exemplo 1: Nova feature em Java (Spring Boot)
 
 ```
 Voce: Preciso adicionar um endpoint REST para consulta de pedidos
       com paginacao, filtro por status e ordenacao por data.
 
 Orchestrator:
+  → Aciona dependency-versions-reviewer (versao Spring Boot atual)
   → Aciona tech-lead-reviewer (simplicidade, padroes)
   → Aciona architect-reviewer (boundaries, contratos REST)
   → Aciona api-contract-reviewer (OpenAPI, breaking changes)
   → Aciona security-reviewer (validacao, autorizacao)
   → Aciona ad-dba-reviewer (query, indice, paginacao)
+  → Aciona java-specialist (idiomatismo Java 25, Spring MVC)
   → Aciona software-engineer (implementacao)
   → Aciona sre-platform-engineer (metricas, observabilidade)
-  → Aciona qa-quality-engineer (testes)
+  → Aciona qa-quality-engineer (testes JUnit 5, Testcontainers)
   → Aciona performance-reliability-reviewer (latencia, N+1)
 
-  → Consolida tudo em resposta com 16 secoes
+  → Consolida tudo em resposta estruturada com 26 secoes
 ```
 
-#### Exemplo 2: Revisao de codigo existente
+#### Exemplo 2: Worker Python para processar eventos SQS
 
 ```
-Voce: Revise o consumer Kafka que processa eventos de pagamento.
+Voce: Preciso de um worker Python que consome eventos SQS,
+      valida payload e persiste no DynamoDB. Lambda ou ECS?
+
+Orchestrator:
+  → Aciona dependency-versions-reviewer (versao boto3, runtimes AWS)
+  → Aciona architect-reviewer (Lambda vs ECS, model de execucao)
+  → Aciona security-reviewer (IAM roles, dados sensiveis)
+  → Aciona compliance-reviewer (LGPD, dados pessoais no payload)
+  → Aciona ad-dba-reviewer (modelagem DynamoDB, partition key)
+  → Aciona python-specialist (pyproject.toml, estrutura, pytest)
+  → Aciona software-engineer (implementacao)
+  → Aciona sre-platform-engineer (DLQ, CloudWatch, X-Ray)
+  → Aciona finops-reviewer (Lambda vs ECS cost, DynamoDB capacity)
+  → Aciona performance-reliability-reviewer (cold start, SQS visibility timeout)
+
+  → Consolida com decisao justificada e plano de implementacao
+```
+
+#### Exemplo 3: API Go com consumer Kafka
+
+```
+Voce: Revise o consumer Kafka em Go que processa eventos de pagamento.
       Quero saber se esta resiliente e seguro para producao.
 
 Orchestrator:
   → Aciona tech-lead-reviewer (complexidade, manutencao)
   → Aciona architect-reviewer (bordas assincronas, idempotencia)
   → Aciona security-reviewer (dados sensiveis em logs, payload)
+  → Aciona go-specialist (goroutines, context, interfaces idiomaticas)
   → Aciona sre-platform-engineer (DLQ, metricas, lag)
-  → Aciona qa-quality-engineer (testes de falha, reprocessamento)
-  → Aciona performance-reliability-reviewer (throughput, backpressure)
+  → Aciona qa-quality-engineer (testes -race, table-driven)
+  → Aciona performance-reliability-reviewer (goroutine leaks, backpressure)
 
   → Consolida com riscos priorizados e plano de acao
 ```
 
-#### Exemplo 3: Tarefa simples (sem orquestracao completa)
+#### Exemplo 4: Tarefa simples (sem orquestracao completa)
 
 ```
 Voce: Corrija o typo no nome do campo "stauts" para "status" na entity Order.
@@ -214,7 +256,7 @@ Orchestrator:
   → Corrige e sugere validacao
 ```
 
-#### Exemplo 4: Acionar agente especifico diretamente
+#### Exemplo 5: Acionar agente especifico diretamente
 
 Se voce sabe que precisa apenas de uma perspectiva, instrua o Claude Code em linguagem natural para usar um agente especifico:
 
@@ -224,16 +266,6 @@ Voce: Usando o security-reviewer, revise a configuracao de autenticacao
 
   → Somente o security-reviewer analisa
   → Resposta focada em seguranca
-```
-
-Ou instrua o orquestrador a consultar apenas os especialistas relevantes:
-
-```
-Voce: Quero apenas a visao de seguranca e performance sobre o consumer Kafka
-      de pagamentos. Nao preciso de analise completa.
-
-  → Orquestrador aciona somente security-reviewer e performance-reliability-reviewer
-  → Resposta mais rapida e focada
 ```
 
 > **Nota**: Sub-agentes no Claude Code nao tem sintaxe especial como `@nome`. Voce os aciona referenciando o nome do agente no texto da mensagem ou deixando o orquestrador decidir automaticamente com base no campo `description` de cada agente.
@@ -282,21 +314,23 @@ Apos o frontmatter, o conteudo Markdown define:
 | `Read` | Le arquivos | Todos |
 | `Glob` | Busca arquivos por padrao | Todos |
 | `Grep` | Busca conteudo em arquivos | Todos |
-| `Edit` | Edita arquivos existentes | orchestrator, software-engineer |
-| `Write` | Cria arquivos novos | orchestrator, software-engineer |
-| `Bash` | Executa comandos no terminal | orchestrator, software-engineer, sre-platform |
+| `Edit` | Edita arquivos existentes | orchestrator, software-engineer, tech-writer |
+| `Write` | Cria arquivos novos | orchestrator, software-engineer, tech-writer |
+| `Bash` | Executa comandos no terminal | orchestrator, software-engineer, sre-platform, tech-writer |
 | `Agent` | Invoca outros agentes | orchestrator (apenas ele) |
+| `WebSearch` | Busca informacoes na web | dependency-versions-reviewer, data-engineering-aws-architect |
+| `WebFetch` | Acessa URLs especificas | dependency-versions-reviewer, data-engineering-aws-architect |
 
-**Decisao de design**: agentes de revisao so podem ler. Apenas o `software-engineer` e o `staff-engineer-orchestrator` podem modificar arquivos. Isso evita que revisores facam mudancas sem consolidacao.
+**Decisao de design**: agentes de revisao so podem ler. Apenas o `software-engineer`, o `staff-engineer-orchestrator` e o `tech-writer` podem modificar arquivos. Isso evita que revisores facam mudancas sem consolidacao.
 
-> O `api-contract-reviewer` tambem e somente leitura — ele revisa contratos (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI, JSON Schema) mas nao os modifica diretamente.
+O `dependency-versions-reviewer` e o `data-engineering-aws-architect` usam `WebSearch`/`WebFetch` para consultar fontes externas atualizadas — nunca assumem versao ou preco por memoria do modelo.
 
 ### Escolha de modelo
 
 | Modelo | Quando usar |
 |--------|-------------|
-| `opus` | Raciocinio complexo, consolidacao, decisoes arquiteturais. Usado no orquestrador. |
-| `sonnet` | Analise focada, revisao, implementacao. Usado nos especialistas. |
+| `opus` | Raciocinio complexo, consolidacao, decisoes arquiteturais. Usado no orquestrador e no data-engineering-aws-architect. |
+| `sonnet` | Analise focada, revisao, implementacao. Usado nos demais especialistas. |
 | `haiku` | Tarefas rapidas e simples. Nao usado aqui, mas disponivel. |
 
 ---
@@ -328,7 +362,8 @@ model: sonnet
 ```markdown
 # Meu Novo Agente
 
-Voce e o [papel] de um sistema critico Java. Seu papel e [descricao clara].
+Voce e o [papel] de um sistema critico, com stack poliglota (Java, Python, Go)
+e suporte a AWS Serverless. Seu papel e [descricao clara].
 
 ## Escopo de revisao
 
@@ -426,28 +461,40 @@ Acoes com prioridade.
 Toda resposta do `staff-engineer-orchestrator` segue **exatamente** esta estrutura:
 
 ```
-1.  Diagnostico inicial           → O que foi pedido e o contexto
-2.  Stack e modulos impactados    → Tecnologias e areas afetadas
-3.  Achados do Tech Lead          → Pragmatismo e manutencao
-4.  Achados do Architect          → Arquitetura e boundaries
-5.  Achados do API Contract       → Contratos, breaking changes, schema governance
-6.  Achados do Security           → Seguranca e riscos
-7.  Achados do AD/DBA             → Dados e persistencia
-8.  Achados do Software Engineer  → Implementacao proposta
-9.  Achados do SRE/Platform       → Operabilidade e deploy
-10. Achados do QA/Quality         → Testes e qualidade
-11. Achados do Performance        → Performance e confiabilidade
-12. Conflitos entre recomendacoes → Divergencias e resolucao
-13. Plano final priorizado        → Acoes ordenadas por prioridade
-14. Diff sugerido                 → Mudancas concretas
-15. Riscos remanescentes          → O que ainda pode dar errado
-16. Estrategia de validacao       → Como confirmar que esta correto
+1.  Diagnostico inicial                    → O que foi pedido e o contexto
+2.  Stack e modulos impactados             → Tecnologias e areas afetadas
+3.  Achados do Dependency Versions         → Versoes GA validadas via WebSearch
+4.  Achados do Tech Lead                   → Pragmatismo e manutencao
+5.  Achados do Architect                   → Arquitetura, boundaries, modelo de execucao
+6.  Achados do API Contract                → Contratos, breaking changes, schema governance
+7.  Achados do Security                    → Seguranca e riscos
+8.  Achados do Compliance                  → LGPD, GDPR, serverless compliance
+9.  Achados do AD/DBA                      → Dados e persistencia
+10. Achados do Data Engineering            → Pipelines, Glue, EMR, Kinesis — omitir se nao aplicavel
+11. Achados do Java Specialist             → Idiomatismo Java 25 — omitir se nao Java
+12. Achados do Python Specialist           → Idiomatismo Python — omitir se nao Python
+13. Achados do Go Specialist               → Idiomatismo Go — omitir se nao Go
+14. Achados do Software Engineer           → Implementacao proposta
+15. Achados do SRE/Platform                → Operabilidade e deploy
+16. Achados do FinOps                      → Custo AWS, rightsizing
+17. Achados do DevEx                       → Onboarding, ambiente local
+18. Achados do QA/Quality                  → Testes e qualidade
+19. Achados do Performance                 → Performance e confiabilidade
+20. Achados do Tech Writer                 → Documentacao — omitir se nao aplicavel
+21. Conflitos entre recomendacoes          → Divergencias e resolucao
+22. Plano final priorizado                 → Acoes ordenadas por prioridade
+23. Diff sugerido                          → Mudancas concretas
+24. Riscos remanescentes                   → O que ainda pode dar errado
+25. Estrategia de validacao                → Como confirmar que esta correto
+26. Documentacao a atualizar               → Docs a criar/atualizar — omitir se nao aplicavel
 ```
 
 Essa estrutura fixa garante:
 - **Rastreabilidade**: voce sabe de onde veio cada recomendacao
 - **Auditabilidade**: facil comparar analises entre demandas diferentes
 - **Completude**: nenhuma perspectiva e ignorada silenciosamente
+
+As secoes de especialistas de linguagem (11–13), data engineering (10), tech writer (20) e documentacao (26) sao omitidas quando nao aplicaveis, mantendo a resposta enxuta.
 
 ---
 
@@ -460,11 +507,11 @@ Ele define:
 | Secao | O que faz |
 |-------|-----------|
 | Agente principal | Quem coordena |
-| Stack oficial | Tecnologias do projeto |
+| Stack oficial | Java, Python, Go, AWS Serverless |
 | Regras de bordas | `web/` e `message/` como bordas da aplicacao |
 | Organizacao arquitetural | Onde cada coisa fica |
 | Checklist transversal | O que toda proposta deve validar |
-| Ordem de consulta | Sequencia dos agentes |
+| Ordem de consulta | Sequencia dos 19 agentes |
 | Regras de execucao | Comportamentos obrigatorios |
 | Regras por framework | Idiomatismo de cada tecnologia |
 
@@ -503,8 +550,9 @@ tools:
   - Read
   - Glob
   - Grep
-  - Edit     # agora o agente pode editar arquivos
-  - Bash     # agora o agente pode executar comandos
+  - Edit      # agora o agente pode editar arquivos
+  - Bash      # agora o agente pode executar comandos
+  - WebSearch # agora o agente pode buscar na web
 ```
 
 ### Remover um agente do fluxo
@@ -525,13 +573,21 @@ Nao. O orquestrador decide quais agentes sao relevantes para cada demanda. Para 
 
 Sim. Voce pode acionar qualquer agente diretamente. O orquestrador e o fluxo recomendado para demandas complexas, mas nao e obrigatorio.
 
-### Funciona com qualquer linguagem?
+### Funciona com Java, Python e Go nativamente?
 
-A estrutura de agentes (`.claude/agents/*.md`) funciona com qualquer projeto no Claude Code. O **conteudo** destes agentes foi escrito para Java (Spring Boot, Quarkus, Micronaut), mas voce pode adaptar para qualquer stack editando os arquivos.
+Sim. A estrutura tem suporte nativo a stack poliglota. Ha especialistas dedicados para cada linguagem (`java-specialist`, `python-specialist`, `go-specialist`) e todos os agentes de revisao foram escritos considerando os tres ecossistemas. AWS Serverless (Lambda, API Gateway, EventBridge, SQS, DynamoDB, S3) tambem e suportado nativamente.
+
+### O que e o dependency-versions-reviewer?
+
+Um agente especial que usa `WebSearch` para verificar a versao GA mais recente de qualquer dependencia — Spring Boot, Quarkus, boto3, runtimes AWS, etc. Ele e acionado obrigatoriamente antes de qualquer implementacao que envolva dependencias, porque o knowledge cutoff do modelo pode estar desatualizado.
+
+### O que e o data-engineering-aws-architect?
+
+Um especialista em data platform e engenharia de dados na AWS. Ele decide com precisao entre Glue, EMR Serverless, EMR on EC2, Lambda e Step Functions para pipelines de dados, justificando trade-offs tecnicos, operacionais e financeiros. Usa `opus` como modelo e `WebSearch` para verificar precos e servicos AWS atualizados.
 
 ### Quanto custa em tokens?
 
-Depende da demanda. Uma analise completa com 9 agentes consome significativamente mais tokens que um unico agente. Para tarefas simples, o custo extra nao se justifica — por isso o orquestrador tem a regra de agir diretamente em tarefas triviais.
+Depende da demanda. Uma analise completa com todos os agentes consome significativamente mais tokens que um unico agente. Para tarefas simples, o custo extra nao se justifica — por isso o orquestrador tem a regra de agir diretamente em tarefas triviais.
 
 ### Posso usar em outro repositorio?
 

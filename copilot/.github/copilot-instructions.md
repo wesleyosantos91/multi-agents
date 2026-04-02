@@ -28,11 +28,12 @@ Trate qualquer mudanca com foco em:
 
 ## Baseline Tecnologico
 
-- Java 25
-- Spring Boot, Quarkus, Micronaut
-- AWS (alvo), LocalStack (local), Docker
-- Terraform
-- JUnit 5, PIT, ArchUnit, Testcontainers
+- Java 25, Spring Boot, Quarkus, Micronaut
+- Python (aplicacoes, workers, jobs, Lambdas) — pyproject.toml, pytest, Ruff
+- Go (APIs, workers, consumers, Lambdas) — go.mod, cmd/internal
+- AWS: Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS
+- LocalStack (local), Docker, Terraform
+- Testes: JUnit 5, PIT, ArchUnit, Testcontainers (Java) | pytest (Python) | testing -race (Go)
 
 ## Guardrails Arquiteturais Minimos
 
@@ -40,6 +41,10 @@ Trate qualquer mudanca com foco em:
 - `message/` nao fica dentro de `infrastructure/`.
 - `core/` e compartilhado tecnico; nao deve virar dominio nem deposito generico.
 - Preserve arquitetura existente, evitando mudancas estruturais sem justificativa forte.
+
+## Regra de Versoes
+
+Nunca assuma versao de dependencia por memoria. Use `dependency-versions-reviewer` com WebSearch antes de qualquer implementacao com dependencias envolvidas.
 
 ## Regra de Escalonamento
 

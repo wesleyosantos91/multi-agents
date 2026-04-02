@@ -15,14 +15,18 @@ O orquestrador consulta as skills especializadas, consolida achados, resolve con
 
 | Camada | Tecnologias |
 |--------|------------|
-| Linguagem | Java 25 |
-| Frameworks | Spring Boot, Quarkus, Micronaut |
-| Cloud | AWS |
+| Linguagens | Java 25 · Python · Go |
+| Frameworks Java | Spring Boot, Quarkus, Micronaut |
+| Python | pyproject.toml, src layout, pytest, Ruff |
+| Go | go.mod, cmd/internal, interfaces idiomáticas |
+| Cloud | AWS (Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
 | Emulação local | LocalStack |
 | Containerização | Docker |
 | IaC | Terraform |
 | Ambiente dev | Dev Container (opcional recomendado) |
-| Testes | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Java | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Python | pytest, fixtures, parametrize |
+| Testes Go | testing, table-driven, -race, testcontainers-go |
 
 ---
 
@@ -232,19 +236,40 @@ Prioridade de regras: `AGENTS.md` > `.codex/agents/*.toml` > `.agents/skills/*/S
 
 ---
 
+## Regra de Versões de Dependências
+
+**Nenhuma skill pode assumir versão de dependência por memória ou knowledge cutoff.**
+
+Sempre que houver criação ou modificação de `pom.xml`, `build.gradle`, `pyproject.toml`, `requirements*.txt`, `go.mod` ou qualquer referência a framework/dependência, o `dependency-versions-reviewer` deve ser acionado **antes** do `software-engineer`. Ele usa WebSearch para verificar a versão GA mais recente no Maven Central, PyPI e go.dev.
+
+- Nunca usar versões RC, SNAPSHOT, M1, M2, Alpha ou Beta em sistemas críticos
+- Sempre confirmar se a versão é GA e tem suporte ativo
+- O knowledge cutoff do modelo pode estar desatualizado — WebSearch é a fonte verdade
+
+---
+
 ## Ordem Padrão de Consulta das Skills
 
 O `staff-engineer-orchestrator` deve consultar as skills nesta ordem preferencial:
 
+0. `dependency-versions-reviewer` — **OBRIGATÓRIO** quando há dependências envolvidas: valida versões GA mais recentes via WebSearch antes de qualquer implementação
 1. `tech-lead-reviewer` — pragmatismo, simplicidade, manutenibilidade
 2. `architect-reviewer` — arquitetura, boundaries, trade-offs, resiliência
 3. `api-contract-reviewer` — contratos de borda, breaking changes, schema governance
 4. `security-reviewer` — segurança, hardening, superfícies de abuso
-5. `ad-dba-reviewer` — dados, persistência, modelagem, queries
-6. `software-engineer` — implementação mínima correta
-7. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
-8. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
-9. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+5. `compliance-reviewer` — LGPD, GDPR, residência de dados, direitos do titular
+6. `ad-dba-reviewer` — dados, persistência, modelagem, queries
+7. `data-engineering-aws-architect` — *(quando há pipelines de dados, ETL/ELT, data lake, streaming, Glue, EMR, Kinesis, Athena)* decisão arquitetural de dados
+8. `java-specialist` — *(quando stack Java)* estrutura, idiomatismo, ecossistema Java 25 + framework
+8. `python-specialist` — *(quando stack Python)* estrutura, idiomatismo, ecossistema Python
+8. `go-specialist` — *(quando stack Go)* estrutura, idiomatismo, ecossistema Go
+9. `software-engineer` — implementação mínima correta (após versões validadas)
+10. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
+11. `finops-reviewer` — custo AWS, rightsizing, anti-padrões de billing
+12. `devex-reviewer` — onboarding, ambiente local, docker-compose, Dev Container (poliglota)
+13. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
+14. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+15. `tech-writer` — *(quando há mudança de comportamento, novo componente ou documentação desatualizada)* README, getting-started, testing, troubleshooting
 
 ---
 
@@ -280,13 +305,22 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Hardening de bordas
 
 ### Testes
-- [ ] JUnit 5 como base
-- [ ] Testes de mutação (PIT)
-- [ ] Testes de arquitetura (ArchUnit)
-- [ ] Testes de integração (Testcontainers)
+- [ ] JUnit 5 como base (Java)
+- [ ] Testes de mutação (PIT) — Java
+- [ ] Testes de arquitetura (ArchUnit) — Java
+- [ ] Testes de integração (Testcontainers) — Java/Go
+- [ ] pytest com fixtures e parametrize — Python
+- [ ] table-driven com -race — Go
 - [ ] Testes de contrato
 - [ ] Testes de borda web e assíncrona
 - [ ] Testes de comportamento em falha
+
+### Versões de dependências
+- [ ] Versão do framework verificada via WebSearch (não por memória)
+- [ ] Versão é GA (não RC, SNAPSHOT, M1, M2, Alpha, Beta)
+- [ ] Compatibilidade com a linguagem da stack confirmada
+- [ ] Sem dependências com CVE crítico ou alto conhecidos
+- [ ] Sem dependências com EOL declarado
 
 ### Contratos de borda
 - [ ] Compatibilidade evolutiva (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI)
@@ -306,6 +340,25 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Terraform quando aplicável
 - [ ] Módulos, variáveis e outputs organizados
 - [ ] Separação por ambiente quando fizer sentido
+
+### Compliance e proteção de dados
+- [ ] Dados pessoais mapeados (LGPD/GDPR)
+- [ ] Base legal para tratamento identificada
+- [ ] Dados pessoais ausentes de logs, traces e métricas
+- [ ] Residência de dados alinhada com região AWS (sa-east-1 para Brasil)
+- [ ] Retenção e descarte de dados pessoais definidos
+
+### FinOps (custo AWS)
+- [ ] Retenção de logs CloudWatch definida
+- [ ] Rightsizing de instâncias/containers avaliado
+- [ ] Tags de custo (cost allocation tags) nas resources Terraform
+- [ ] Sem anti-padrões de billing críticos (NAT Gateway desnecessário, logs ilimitados, etc.)
+
+### Experiência do desenvolvedor
+- [ ] Onboarding documentado (máximo 3-5 comandos para rodar localmente)
+- [ ] docker-compose sobe todos os serviços necessários
+- [ ] Configuração local completa e funcional por linguagem
+- [ ] LocalStack cobre os serviços AWS usados localmente
 
 ---
 
@@ -375,3 +428,16 @@ Toda proposta, revisão ou implementação deve validar:
 ### Terraform
 - Módulos organizados, separação por ambiente, naming consistente
 
+### Python
+- pyproject.toml como único ponto de configuração
+- src layout — evitar importações ambíguas
+- Type hints obrigatórios em código de produção
+- Ruff para lint/format, pytest para testes
+- Lockfile reprodutível versionado no repositório
+
+### Go
+- go.mod e go.sum versionados
+- cmd/ para entrypoints, internal/ como padrão
+- context.Context como primeiro parâmetro em funções com I/O
+- Erros com contexto usando %w
+- Table-driven tests com -race em CI

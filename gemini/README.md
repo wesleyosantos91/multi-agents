@@ -55,15 +55,24 @@ Você pode invocar especialistas diretamente para tarefas específicas usando a 
 | :--- | :--- | :--- |
 | `/upgrade-plan` | **Orchestrator** | Criar planos complexos de refatoração ou migração. |
 | `/review-architecture` | **Architect + Orchestrator** | Revisar limites de sistema, resiliência e trade-offs. |
+| `/dependency-versions-reviewer` | **Versions** | Validar versões GA de dependências via WebSearch. |
 | `/tech-lead-reviewer` | **Tech Lead** | Validar simplicidade e evitar débitos técnicos. |
 | `/architect-reviewer` | **Architect** | Decisões estruturais, acoplamento e coesão. |
-| `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
-| `/security-reviewer` | **Security** | Validar vulnerabilidades, auth e hardening. |
 | `/api-contract-reviewer` | **API Contract** | Estabilidade de contratos, breaking changes e schema governance. |
+| `/security-reviewer` | **Security** | Validar vulnerabilidades, auth e hardening. |
+| `/compliance-reviewer` | **Compliance** | LGPD, GDPR, residência de dados e direitos do titular. |
 | `/ad-dba-reviewer` | **DBA** | Revisar modelagem de dados, queries e índices. |
+| `/data-engineering-aws-architect` | **Data Engineering** | Pipelines, ETL/ELT, Glue, EMR, Kinesis, trade-offs de dados AWS. |
+| `/java-specialist` | **Java** | Estrutura, idiomatismo Java 25, Spring Boot, Quarkus, Micronaut. |
+| `/python-specialist` | **Python** | Estrutura, pyproject.toml, pytest, Ruff, Lambda Python. |
+| `/go-specialist` | **Go** | Estrutura, go.mod, interfaces, context, table-driven tests. |
+| `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
+| `/sre-platform-engineer` | **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
+| `/finops-reviewer` | **FinOps** | Custo AWS, rightsizing e anti-padrões de billing. |
+| `/devex-reviewer` | **DevEx** | Onboarding, ambiente local, docker-compose, Dev Container. |
 | `/qa-quality-engineer` | **QA** | Cenários de teste, edge cases e riscos de regressão. |
 | `/performance-reliability-reviewer` | **Performance** | Throughput, latência, GC e escalabilidade. |
-| `/sre-platform-engineer` | **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
+| `/tech-writer` | **Tech Writer** | README, getting-started, testing, troubleshooting. |
 
 #### Exemplos de Uso no Terminal:
 

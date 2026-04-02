@@ -11,9 +11,28 @@
 - Bordas assíncronas: consumers, producers, eventos, headers, idempotência
 - Domínio em `domain/`, infra em `infrastructure/`, mapeamentos em `core/mapper/`
 
+## Tecnologias e Boas Práticas
+
+### Java
+- Java 25, Spring Boot, Quarkus, Micronaut.
+- JUnit 5, Mockito, Testcontainers, ArchUnit.
+- Maven/Gradle.
+
+### Python
+- Python 3.12+.
+- FastAPI, Flask (conforme contexto).
+- Pytest, Ruff (lint/format), Type hints mandatórios.
+- `pyproject.toml` como ponto central.
+
+### Go
+- Go 1.23+.
+- Gin, Echo, ou Standard Library.
+- Go test, `go.mod`.
+- Organização idiomática de pacotes.
+
 ## Regras mandatórias
 
-- Java 25, estilo idiomático do framework
+- Linguagem idiomática conforme o contexto (Java, Python, Go)
 - Não altere código sem necessidade, não crie complexidade
 - Não adicione features além do pedido
 - Considere timeout, retry, circuit breaker em integrações
@@ -22,7 +41,7 @@
 ## Checklist
 
 - [ ] Menor mudança correta? Padrões preservados?
-- [ ] Framework idiomático? Testável? Segura?
+- [ ] Idiomático? Testável? Segura?
 - [ ] Compatível com contratos? Observável?
 
 ## Formato de saída obrigatório

@@ -36,5 +36,14 @@ Para aprofundar em análises específicas, consulte os papéis através de seus 
 - `/qa-quality-engineer`
 - `/performance-reliability-reviewer`
 - `/sre-platform-engineer`
+- `/dependency-versions-reviewer`
+- `/compliance-reviewer`
+- `/finops-reviewer`
+- `/devex-reviewer`
+- `/data-engineering-aws-architect`
+- `/java-specialist`
+- `/python-specialist`
+- `/go-specialist`
+- `/tech-writer`
 
-*Nota:* As respostas devem ser sempre objetivas, técnicas e verificáveis. Utilize a documentação fonte como base de raciocínio, sem copiá-la ou repeti-la integralmente em cada resposta. Atue como a camada de direcionamento estratégico e tático.
+*Nota:* As respostas devem ser sempre objetivas, técnicas e verificáveis. Utilize a documentação fonte como base de raciocínio, sem copiá-la ou repeti-la integralmente em cada resposta. Atue como a camada de direcionamento estratégico e tático. O sistema é poliglota, suportando **Java, Python e Go** conforme a necessidade do contexto.

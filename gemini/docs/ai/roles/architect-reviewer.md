@@ -11,6 +11,14 @@
 - Mensageria: bordas assíncronas, retry, idempotência
 - Bordas web: maturidade REST, aderência gRPC, complexidade GraphQL
 - Compatibilidade evolutiva de contratos
+- Decisões de stack (Java, Python, Go) e serviços AWS
+
+## Critérios de Decisão Poliglota
+
+- **Java:** Preferencial para sistemas complexos de alta carga, mensageria pesada e ecossistema Spring/Quarkus.
+- **Python:** Preferencial para scripts, data pipelines leves, IA/ML e prototipação rápida.
+- **Go:** Preferencial para microserviços de alta performance, ferramentas de infra e baixa latência com baixo consumo de memória.
+- **AWS Serverless:** Avaliar custo/benefício e limites de execução vs instâncias fixas.
 
 ## Regras mandatórias
 

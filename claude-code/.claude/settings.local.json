@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /c/dev/pocs/multi-agents/claude-code/src/main/java/com/example/product/web/api/controller)",
+      "Bash(mkdir -p /c/dev/pocs/multi-agents/claude-code/src/main/java/com/example/product/web/api/request)",
+      "Bash(mkdir -p /c/dev/pocs/multi-agents/claude-code/src/main/java/com/example/product/web/api/response)",
+      "Bash(mkdir -p /c/dev/pocs/multi-agents/claude-code/src/main/java/com/example/product/web/api/exception)",
+      "Bash(mkdir -p /c/dev/pocs/multi-agents/claude-code/src/main/java/com/example/product/domain/entity)"
+    ]
+  }
+}

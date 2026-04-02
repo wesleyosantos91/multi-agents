@@ -2,7 +2,7 @@
 
 Estrutura multiagente para diferentes plataformas de AI coding assistants.
 
-Cada pasta contem a estrutura completa e pronta para uso da plataforma correspondente, com os mesmos 10 papeis especializados adaptados ao modelo operacional de cada ferramenta.
+Cada pasta contem a estrutura completa e pronta para uso da plataforma correspondente, com os mesmos 19 papeis especializados adaptados ao modelo operacional de cada ferramenta.
 
 ```
 .
@@ -33,15 +33,24 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 | # | Papel | Foco |
 |---|-------|------|
 | 0 | staff-engineer-orchestrator | Maestro — coordena, consolida, plano final |
-| 1 | tech-lead-reviewer | Pragmatismo, simplicidade, manutencao |
-| 2 | architect-reviewer | Boundaries, resiliencia, contratos |
-| 3 | api-contract-reviewer | OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI |
-| 4 | security-reviewer | Seguranca, hardening |
-| 5 | ad-dba-reviewer | Dados, modelagem, queries |
-| 6 | software-engineer | Implementacao minima correta |
-| 7 | sre-platform-engineer | Operabilidade, IaC |
-| 8 | qa-quality-engineer | Testes, edge cases |
-| 9 | performance-reliability-reviewer | Throughput, latencia |
+| 1 | dependency-versions-reviewer | Versoes GA via WebSearch — Java, Python, Go, AWS runtimes |
+| 2 | tech-lead-reviewer | Pragmatismo, simplicidade, manutencao |
+| 3 | architect-reviewer | Boundaries, resiliencia, contratos |
+| 4 | api-contract-reviewer | OpenAPI, Protobuf, GraphQL, Avro, AsyncAPI |
+| 5 | security-reviewer | Seguranca, hardening (Java, Python, Go, serverless) |
+| 6 | compliance-reviewer | LGPD, GDPR, residencia de dados, serverless compliance |
+| 7 | ad-dba-reviewer | Dados, modelagem, queries |
+| 8 | data-engineering-aws-architect | Pipelines, Glue, EMR, Kinesis, Athena — trade-offs dados AWS |
+| 9 | java-specialist | Java 25, Spring Boot, Quarkus, Micronaut |
+| 10 | python-specialist | Python, pyproject.toml, pytest, Ruff, Lambda Python |
+| 11 | go-specialist | Go, go.mod, interfaces, context, table-driven tests |
+| 12 | software-engineer | Implementacao minima correta (poliglota) |
+| 13 | sre-platform-engineer | Operabilidade, IaC, Lambda observability |
+| 14 | finops-reviewer | Custo AWS, rightsizing, anti-padroes de billing |
+| 15 | devex-reviewer | Onboarding, ambiente local, Dev Container (poliglota) |
+| 16 | qa-quality-engineer | Testes, edge cases (Java, Python, Go, serverless) |
+| 17 | performance-reliability-reviewer | Throughput, latencia, cold start |
+| 18 | tech-writer | README, getting-started, testing, troubleshooting |
 
 ## Comparativo entre plataformas
 

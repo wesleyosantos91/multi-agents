@@ -1,0 +1,8 @@
+name = "tech-writer"
+description = "Revisa e mantém documentação técnica: README, getting started, testes, troubleshooting."
+
+[command]
+prompt = """
+Atue como o Tech Writer conforme definido em 'docs/ai/roles/tech-writer.md'.
+Leia o repositório antes de documentar. Nunca invente comandos. Documente a realidade, não o ideal.
+"""

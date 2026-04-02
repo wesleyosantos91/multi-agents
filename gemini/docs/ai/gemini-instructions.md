@@ -17,14 +17,18 @@ Os papéis especializados estão documentados em `docs/ai/roles/` e o orquestrad
 
 | Camada | Tecnologias |
 |--------|------------|
-| Linguagem | Java 25 |
-| Frameworks | Spring Boot, Quarkus, Micronaut |
-| Cloud | AWS |
+| Linguagens | Java 25 · Python · Go |
+| Frameworks Java | Spring Boot, Quarkus, Micronaut |
+| Python | pyproject.toml, src layout, pytest, Ruff |
+| Go | go.mod, cmd/internal, interfaces idiomáticas |
+| Cloud | AWS (Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
 | Emulação local | LocalStack |
 | Containerização | Docker |
 | IaC | Terraform |
 | Ambiente dev | Dev Container (opcional recomendado) |
-| Testes | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Java | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Python | pytest, fixtures, parametrize |
+| Testes Go | testing, table-driven, -race |
 
 ---
 
@@ -115,19 +119,34 @@ Detalhes técnicos e operacionais: datastore, resilience, logging, metrics, open
 
 ---
 
+## Regra de Versões de Dependências
+
+**Nenhum papel pode assumir versão de dependência por memória.** Sempre que houver `pom.xml`, `build.gradle`, `pyproject.toml`, `requirements*.txt` ou `go.mod`, o `dependency-versions-reviewer` deve ser acionado **antes** do `software-engineer` via WebSearch.
+
+---
+
 ## Ordem Padrão de Consulta dos Papéis
 
 O `staff-engineer-orchestrator` deve consultar nesta ordem:
 
+0. `dependency-versions-reviewer` — **OBRIGATÓRIO quando há dependências**: versões GA via WebSearch
 1. `tech-lead-reviewer` — pragmatismo, simplicidade, manutenibilidade
 2. `architect-reviewer` — arquitetura, boundaries, trade-offs, resiliência
 3. `api-contract-reviewer` — contratos de borda, breaking changes, schema governance
 4. `security-reviewer` — segurança, hardening, superfícies de abuso
-5. `ad-dba-reviewer` — dados, persistência, modelagem, queries
-6. `software-engineer` — implementação mínima correta
-7. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
-8. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
-9. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+5. `compliance-reviewer` — LGPD, GDPR, residência de dados, direitos do titular
+6. `ad-dba-reviewer` — dados, persistência, modelagem, queries
+7. `data-engineering-aws-architect` — *(quando há pipelines de dados, ETL/ELT, streaming, Glue, EMR, Kinesis)*
+8. `java-specialist` — *(quando stack Java)* estrutura, idiomatismo, ecossistema Java 25
+8. `python-specialist` — *(quando stack Python)* estrutura, idiomatismo, ecossistema Python
+8. `go-specialist` — *(quando stack Go)* estrutura, idiomatismo, ecossistema Go
+9. `software-engineer` — implementação mínima correta (após versões validadas)
+10. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
+11. `finops-reviewer` — custo AWS, rightsizing, anti-padrões de billing
+12. `devex-reviewer` — onboarding, ambiente local, docker-compose, Dev Container
+13. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
+14. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+15. `tech-writer` — *(quando há mudança de comportamento ou documentação desatualizada)*
 
 ---
 

@@ -37,15 +37,24 @@ Para detalhes completos do comportamento esperado, consulte `docs/ai/orchestrati
 
 Os especialistas representam perspectivas tecnicas independentes:
 
+- `dependency-versions-reviewer`: versoes GA via WebSearch — Java, Python, Go, AWS runtimes
 - `tech-lead-reviewer`: simplicidade, pragmatismo, manutencao
 - `architect-reviewer`: boundaries, trade-offs, resiliencia estrutural
 - `api-contract-reviewer`: contratos e compatibilidade evolutiva
 - `security-reviewer`: auth/authz, segredos, hardening, abuso
+- `compliance-reviewer`: LGPD, GDPR, residencia de dados, direitos do titular
 - `ad-dba-reviewer`: dados, modelagem, consultas, indices
-- `software-engineer`: implementacao minima correta
+- `data-engineering-aws-architect`: pipelines, ETL/ELT, Glue, EMR, Kinesis, trade-offs de dados AWS
+- `java-specialist`: Java 25, Spring Boot, Quarkus, Micronaut
+- `python-specialist`: Python, pyproject.toml, pytest, Ruff, Lambda Python
+- `go-specialist`: Go, go.mod, interfaces, context, table-driven tests
+- `software-engineer`: implementacao minima correta (poliglota)
 - `sre-platform-engineer`: operacao, deploy, observabilidade, IaC
+- `finops-reviewer`: custo AWS, rightsizing, anti-padroes de billing
+- `devex-reviewer`: onboarding, ambiente local, Dev Container (poliglota)
 - `qa-quality-engineer`: testes, regressao, edge cases, risco de producao
 - `performance-reliability-reviewer`: latencia, throughput, confiabilidade e escala
+- `tech-writer`: README, getting-started, testing, troubleshooting
 
 ## Camadas de customizacao
 
@@ -68,8 +77,10 @@ copilot/
 │   ├── instructions/
 │   │   ├── api.instructions.md
 │   │   ├── frameworks.instructions.md
+│   │   ├── go.instructions.md
 │   │   ├── java.instructions.md
 │   │   ├── messaging.instructions.md
+│   │   ├── python.instructions.md
 │   │   ├── security.instructions.md
 │   │   ├── terraform.instructions.md
 │   │   └── testing.instructions.md
@@ -77,13 +88,22 @@ copilot/
 │       ├── ad-dba-reviewer.agent.md
 │       ├── api-contract-reviewer.agent.md
 │       ├── architect-reviewer.agent.md
+│       ├── compliance-reviewer.agent.md
+│       ├── data-engineering-aws-architect.agent.md
+│       ├── dependency-versions-reviewer.agent.md
+│       ├── devex-reviewer.agent.md
+│       ├── finops-reviewer.agent.md
+│       ├── go-specialist.agent.md
+│       ├── java-specialist.agent.md
 │       ├── performance-reliability-reviewer.agent.md
+│       ├── python-specialist.agent.md
 │       ├── qa-quality-engineer.agent.md
 │       ├── security-reviewer.agent.md
 │       ├── software-engineer.agent.md
 │       ├── sre-platform-engineer.agent.md
 │       ├── staff-engineer-orchestrator.agent.md
-│       └── tech-lead-reviewer.agent.md
+│       ├── tech-lead-reviewer.agent.md
+│       └── tech-writer.agent.md
 └── docs/ai/
     ├── orchestration/
     │   └── staff-engineer-orchestrator.md
@@ -91,12 +111,21 @@ copilot/
         ├── ad-dba-reviewer.md
         ├── api-contract-reviewer.md
         ├── architect-reviewer.md
+        ├── compliance-reviewer.md
+        ├── data-engineering-aws-architect.md
+        ├── dependency-versions-reviewer.md
+        ├── devex-reviewer.md
+        ├── finops-reviewer.md
+        ├── go-specialist.md
+        ├── java-specialist.md
         ├── performance-reliability-reviewer.md
+        ├── python-specialist.md
         ├── qa-quality-engineer.md
         ├── security-reviewer.md
         ├── software-engineer.md
         ├── sre-platform-engineer.md
-        └── tech-lead-reviewer.md
+        ├── tech-lead-reviewer.md
+        └── tech-writer.md
 ```
 
 ## Como adotar em seu repositorio
