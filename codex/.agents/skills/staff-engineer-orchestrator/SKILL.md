@@ -38,9 +38,10 @@ Você é o orquestrador principal de um sistema crítico com stack poliglota (Ja
 1. Entenda a demanda completamente
 2. Identifique stack, framework e módulos impactados
 3. Consulte as skills relevantes (leia cada `SKILL.md` e aplique a análise)
-4. Consolide achados e resolva conflitos
-5. Defina o plano final priorizado
-6. Só então proponha implementação mínima segura
+4. Espere todos concluírem
+5. Consolide achados e resolva conflitos
+6. Defina o plano final priorizado
+7. Só então proponha implementação mínima segura
 
 Para tarefas triviais (correção pontual, ajuste de configuração simples), você pode agir diretamente com bom senso.
 
@@ -67,6 +68,20 @@ Para tarefas triviais (correção pontual, ajuste de configuração simples), vo
 | `domain/` | Domínio | Entidades, serviços, repositórios, eventos, exceções de domínio. |
 | `infrastructure/` | Infraestrutura | Detalhes técnicos e operacionais. |
 | `infrastructure/messaging/` | Detalhe de broker | Configuração e transporte de mensageria. NÃO é a borda. |
+
+### Regras de nomenclatura de mensageria
+- Pacotes: `consumer/`, `producer/` (estável)
+- Classes: idiomáticas da tecnologia (Kafka: Consumer/Producer, SQS: Listener/Sender)
+- Não usar `request/`, `response/`, `model/` ou `mapper/` dentro de `message/`
+- Mapeamentos compartilhados ficam em `core/mapper/`
+
+### Regras de bordas web
+- `web/api/`: REST/HTTP — OpenAPI, RFC 9457, recursos, verbos, status codes corretos
+- `web/grpc/`: gRPC — protobuf-first, backward compatibility, deadlines, mapeamentos em `core/mapper/`
+- `web/graphql/`: GraphQL — schema claro, controle de profundidade, N+1, cursor-based pagination
+- Não expor entidades de domínio nas bordas
+- DTOs próprios por protocolo
+- Não misturar semânticas de REST, gRPC e GraphQL
 
 ## Ordem de consulta das skills
 
@@ -127,11 +142,12 @@ Antes de consolidar, verifique que a análise cobriu:
 - [ ] Hardening de bordas
 
 ### Testes
-- [ ] JUnit 5, PIT, ArchUnit, Testcontainers (Java)
-- [ ] pytest com fixtures e parametrize (Python)
-- [ ] table-driven com -race (Go)
-- [ ] Testes de contrato, borda web e assíncrona
+- [ ] Testes unitários com padrão da linguagem (JUnit 5 / pytest / testing / Jest)
+- [ ] Testes de integração com dependências reais (Testcontainers / Ministack)
+- [ ] Testes de contrato
+- [ ] Testes de borda web e assíncrona
 - [ ] Testes de comportamento em falha
+- [ ] Handler serverless testável sem AWS SDK (quando aplicável)
 
 ### Versões de dependências
 - [ ] Versões verificadas via WebSearch — não por memória
@@ -142,12 +158,26 @@ Antes de consolidar, verifique que a análise cobriu:
 - [ ] Compatibilidade evolutiva (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI)
 - [ ] Breaking changes identificados e justificados
 - [ ] Schema governance e versionamento
+- [ ] Testes de contrato
+- [ ] Schema Registry configurado (quando Avro/Protobuf)
 
 ### Dados e persistência
-- [ ] Trade-offs, CAP theorem, índices, queries, paginação
+- [ ] Trade-offs relacional vs não relacional
+- [ ] CAP theorem quando aplicável
+- [ ] Índices e otimização de queries
+- [ ] Paginação e concorrência
+- [ ] Aderência ao ecossistema AWS
 
 ### Infraestrutura como código
 - [ ] Terraform quando aplicável
+- [ ] Módulos, variáveis e outputs organizados
+
+### Mensageria (quando aplicável)
+- [ ] Idempotência e deduplicação
+- [ ] Ordering quando aplicável
+- [ ] DLQ e poison message handling
+- [ ] Correlação e tracing
+- [ ] Proteção contra flood/reprocessamento
 
 ### Compliance e proteção de dados
 - [ ] Dados pessoais mapeados (LGPD/GDPR)
