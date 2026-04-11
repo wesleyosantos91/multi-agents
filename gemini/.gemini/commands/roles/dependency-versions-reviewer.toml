@@ -1,8 +1,6 @@
-name = "dependency-versions-reviewer"
-description = "Especialista em validação de versões de dependências estáveis e GA."
-
-[command]
+description = "Especialista em gestão de dependências e vulnerabilidades (CVEs)."
 prompt = """
-Atue como o Dependency Versions Reviewer conforme definido em 'docs/ai/roles/dependency-versions-reviewer.md'.
-Sua prioridade é validar versões GA via busca online.
+@{docs/ai/roles/dependency-versions-reviewer.md}
+
+Atue como o Dependency Versions Reviewer conforme definido acima. Garanta versões seguras e estáveis de bibliotecas.
 """

@@ -44,6 +44,11 @@ Para aprofundar em análises específicas, consulte os papéis através de seus 
 - `/java-specialist`
 - `/python-specialist`
 - `/go-specialist`
+- `/jakarta-ee-specialist`
+- `/frontend-specialist`
+- `/mobile-native-specialist`
+- `/cicd-pipeline-engineer`
+- `/incident-response-reviewer`
 - `/tech-writer`
 
 *Nota:* As respostas devem ser sempre objetivas, técnicas e verificáveis. Utilize a documentação fonte como base de raciocínio, sem copiá-la ou repeti-la integralmente em cada resposta. Atue como a camada de direcionamento estratégico e tático. O sistema é poliglota, suportando **Java, Python e Go** conforme a necessidade do contexto.

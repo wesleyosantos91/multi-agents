@@ -66,8 +66,13 @@ Você pode invocar especialistas diretamente para tarefas específicas usando a 
 | `/java-specialist` | **Java** | Estrutura, idiomatismo Java 25, Spring Boot, Quarkus, Micronaut. |
 | `/python-specialist` | **Python** | Estrutura, pyproject.toml, pytest, Ruff, Lambda Python. |
 | `/go-specialist` | **Go** | Estrutura, go.mod, interfaces, context, table-driven tests. |
+| `/jakarta-ee-specialist` | **Jakarta EE** | Java EE, MicroProfile, servidores de aplicação (WildFly, Liberty). |
+| `/frontend-specialist` | **Frontend** | React, Angular, AngularJS (legado), performance e a11y. |
+| `/mobile-native-specialist` | **Mobile** | Android (Kotlin/Compose), iOS (Swift/SwiftUI), segurança mobile. |
 | `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
+| `/cicd-pipeline-engineer` | **CI/CD** | Pipelines seguras, GitHub Actions, deploy canary/blue-green. |
 | `/sre-platform-engineer` | **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
+| `/incident-response-reviewer` | **Incident Response** | SLOs/SLIs, runbooks, on-call e chaos engineering (AWS FIS). |
 | `/finops-reviewer` | **FinOps** | Custo AWS, rightsizing e anti-padrões de billing. |
 | `/devex-reviewer` | **DevEx** | Onboarding, ambiente local, docker-compose, Dev Container. |
 | `/qa-quality-engineer` | **QA** | Cenários de teste, edge cases e riscos de regressão. |
@@ -124,12 +129,12 @@ gemini/
    ```toml
    description = "Descrição curta exibida no /help"
    prompt = """
-   !{cat docs/ai/roles/nome-do-papel.md}
+   @{docs/ai/roles/nome-do-papel.md}
 
    Você é o [Nome do Papel] conforme definido acima. [Instrução resumida de persona e prioridade.]
    """
    ```
-   > O `!{cat ...}` injeta o conteúdo do arquivo `.md` no prompt no momento da invocação.
+   > O `@{path}` injeta o conteúdo do arquivo no prompt no momento da invocação.
 
 3. **Registre:** Adicione o novo comando na lista de comandos do `GEMINI.md`.
 

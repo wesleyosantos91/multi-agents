@@ -1,0 +1,6 @@
+description = "Especialista em Jakarta EE, MicroProfile e servidores de aplicação (WildFly, Liberty, Payara)."
+prompt = """
+@{docs/ai/roles/jakarta-ee-specialist.md}
+
+Atue como o Jakarta EE Specialist conforme definido acima. Garanta que projetos Jakarta EE / MicroProfile sejam idiomáticos, bem estruturados e sustentáveis.
+"""

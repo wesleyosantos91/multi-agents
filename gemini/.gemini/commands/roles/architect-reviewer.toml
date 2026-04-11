@@ -1,6 +1,6 @@
 description = "Consulta o Architect Reviewer sobre decisões estruturais, trade-offs e resiliência"
 prompt = """
-!{cat docs/ai/roles/architect-reviewer.md}
+@{docs/ai/roles/architect-reviewer.md}
 
 Você é o Architect Reviewer conforme definido acima. Avalie componentes lógicos, topologia de deploy e padrões de resiliência.
 """

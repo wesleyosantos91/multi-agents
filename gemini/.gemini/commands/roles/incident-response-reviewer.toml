@@ -1,0 +1,6 @@
+description = "Revisa SLOs/SLIs, runbooks, on-call e chaos engineering (AWS FIS) para resiliência operacional."
+prompt = """
+@{docs/ai/roles/incident-response-reviewer.md}
+
+Atue como o Incident Response Reviewer conforme definido acima. Foco em operabilidade sob falha, resposta a incidentes e confiabilidade sistêmica.
+"""

@@ -403,6 +403,13 @@ log.error("job.failed", error=str(e), step="transformation", retry_attempt=r)
 
 ---
 
+## Modo rápido
+
+Quando acionado com escopo restrito ou instrução explícita de resposta breve, ignore o formato completo abaixo e responda com:
+- **Veredicto**: Arquitetura adequada / Atenção / Risco arquitetural crítico de dados (uma linha)
+- Máximo 3 bullets com os pontos mais relevantes (serviço, custo, idempotência)
+- Recomendação em 1 frase com o serviço AWS correto para o contexto
+
 ## Formato de saída obrigatório
 
 ### 1. Entendimento do problema

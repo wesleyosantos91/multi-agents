@@ -26,60 +26,126 @@ Você é o especialista em Python de um sistema crítico. Sua função é garant
 
 ## Estrutura de projeto por tipo de componente
 
-### Aplicação com arquitetura explícita (API, worker, serviço)
+### Aplicação com arquitetura explícita (API REST / FastAPI)
+
+Estrutura padrão para APIs e serviços com lógica de negócio:
 
 ```
-src/
-  <package>/
-    domain/          # entidades, regras de negócio, interfaces de repositório
-    application/     # use cases, serviços de aplicação
-    adapters/        # implementações de repositório, clientes externos
-    entrypoints/     # handlers HTTP, consumers, CLI — finos, sem lógica de negócio
-tests/
-  unit/
-  integration/
-pyproject.toml
+meu_projeto/
+├── pyproject.toml
+├── src/
+│   └── meu_projeto/
+│       ├── __init__.py
+│       ├── main.py              # entrypoint — app = FastAPI(), monta routers
+│       ├── settings.py          # configuração via pydantic-settings / env vars
+│       ├── api/
+│       │   ├── routers/
+│       │   │   ├── orders.py    # router de recurso — fino, delega para service
+│       │   │   └── health.py    # health check
+│       │   └── dependencies.py  # FastAPI dependencies (auth, db session, etc.)
+│       ├── domain/              # entidades e regras de negócio puras
+│       │   ├── __init__.py
+│       │   └── order.py         # dataclass / pydantic domain model
+│       ├── services/            # lógica de aplicação — orquestra domain + repositories
+│       │   ├── __init__.py
+│       │   └── order_service.py
+│       ├── repositories/        # acesso a dados — implementações desacopladas
+│       │   ├── __init__.py
+│       │   └── dynamodb_order_repository.py
+│       └── schemas/             # request/response schemas (Pydantic) — separados do domínio
+│           ├── __init__.py
+│           ├── order_request.py
+│           └── order_response.py
+└── tests/
+    ├── unit/
+    │   ├── test_services.py
+    │   └── test_domain.py
+    └── integration/
+        └── test_api.py
 ```
 
-Use essa estrutura quando o projeto tem lógica de negócio relevante. Não force arquitetura hexagonal em scripts ou projetos pequenos.
+**Regras de responsabilidade**:
+- `api/routers/` → recebe request, valida schema, delega para service, serializa response — SEM lógica de negócio
+- `domain/` → entidades e regras de negócio puras — SEM dependência de framework ou infraestrutura
+- `services/` → orquestra `domain/` + `repositories/` — testável com mocks
+- `repositories/` → acesso a dados — implementa interfaces implícitas ou Protocols de `domain/`
+- `schemas/` → Pydantic models para entrada/saída da API — NÃO expor entidades de domínio diretamente
+- `settings.py` → `pydantic-settings` com `BaseSettings`, lê de env vars e `.env`
+
+### Lambda AWS com SQS
+
+Estrutura de Lambda com separação em camadas (mesmo padrão da aplicação, adaptado para evento):
+
+```
+meu_projeto/
+├── pyproject.toml
+├── src/
+│   └── meu_projeto/
+│       ├── __init__.py
+│       ├── message/
+│       │   └── sqs/
+│       │       ├── consumer/
+│       │       │   ├── __init__.py
+│       │       │   └── handler.py       # entrypoint Lambda — fino
+│       │       └── event/
+│       │           ├── __init__.py
+│       │           └── order_event.py   # schema do corpo SQS (Pydantic)
+│       ├── domain/
+│       │   ├── entity/
+│       │   │   ├── __init__.py
+│       │   │   └── order.py             # entidade de domínio (Pydantic ou dataclass)
+│       │   ├── repository/
+│       │   │   ├── __init__.py
+│       │   │   └── order_repository.py  # Protocol (interface)
+│       │   └── service/
+│       │       ├── __init__.py
+│       │       ├── order_publisher.py   # Protocol (interface)
+│       │       └── order_service.py     # lógica de negócio
+│       └── infrastructure/
+│           ├── datastore/
+│           │   ├── __init__.py
+│           │   └── dynamodb_repository.py  # implements OrderRepository Protocol
+│           └── messaging/
+│               ├── __init__.py
+│               └── sns_publisher.py        # implements OrderPublisher Protocol
+└── tests/
+    ├── unit/
+    │   ├── test_handler.py
+    │   └── test_service.py
+    └── events/
+        ├── sqs_event_valid.json
+        └── sqs_event_invalid.json
+```
+
+**Regras de dependência para Lambda**:
+- `message/sqs/consumer/` → importa `domain/` e `message/sqs/event/`
+- `domain/` → NÃO importa `message/` nem `infrastructure/`
+- `infrastructure/` → importa `domain/`
+- O `handler.py` mapeia `OrderReceivedEvent` → entidade de domínio antes de chamar o service
 
 ### Job / script / automação
 
 ```
-src/
-  <package>/
-    core/            # lógica central reutilizável
-    io/              # leitura/escrita de fontes externas
-    cli.py           # entrypoint CLI — fino
-tests/
-pyproject.toml
+meu_projeto/
+├── pyproject.toml
+└── src/
+    └── meu_projeto/
+        ├── __init__.py
+        ├── main.py              # entrypoint CLI — fino
+        ├── settings.py
+        ├── core/                # lógica central reutilizável
+        └── io/                  # leitura/escrita de fontes externas
 ```
-
-### Lambda AWS
-
-```
-src/
-  <package>/
-    handler.py       # entrypoint Lambda — fino: recebe evento, valida, delega, retorna
-    service.py       # lógica de negócio — testável sem AWS SDK
-    adapters/        # clientes AWS, banco, APIs externas — desacoplados
-tests/
-  unit/
-  events/            # payloads de evento para testes (sqs_event.json, etc.)
-pyproject.toml
-```
-
-O handler deve fazer apenas: receber evento → extrair dados → delegar para service → retornar resposta. Sem lógica de negócio no handler.
 
 ### Biblioteca / pacote reutilizável
 
 ```
-src/
-  <package>/
-    __init__.py      # exporta API pública explicitamente
-    ...
-tests/
-pyproject.toml
+meu_projeto/
+├── pyproject.toml
+└── src/
+    └── meu_projeto/
+        ├── __init__.py          # exporta API pública explicitamente
+        └── ...
 ```
 
 ## pyproject.toml — configuração mínima esperada
@@ -205,6 +271,92 @@ def test_handler_invalid_payload():
 
 Fixtures de eventos em `tests/events/*.json` — manter payloads reais de SQS, EventBridge, API GW.
 
+## AWS Lambda Powertools for Python
+
+Para Lambdas em sistema crítico, `aws-lambda-powertools` é a biblioteca padrão de observabilidade. Integra logging estruturado, tracing X-Ray e métricas CloudWatch com decorators idiomáticos.
+
+### Instalação
+
+```toml
+# pyproject.toml
+[project]
+dependencies = [
+    "aws-lambda-powertools[tracer,parser]>=3.0.0",
+    # [tracer] adiciona aws-xray-sdk; [parser] adiciona pydantic v2
+]
+```
+
+### Padrão de uso no handler
+
+```python
+# src/order_processor/message/sqs/consumer/handler.py
+from aws_lambda_powertools import Logger, Tracer, Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+from aws_lambda_powertools.utilities.batch import (
+    BatchProcessor,
+    EventType,
+    process_partial_response,
+)
+from aws_lambda_powertools.utilities.typing import LambdaContext
+
+logger = Logger()      # loga em JSON, injeta request_id, função, versão
+tracer = Tracer()      # integra com X-Ray
+metrics = Metrics(namespace="OrderProcessor")
+
+processor = BatchProcessor(event_type=EventType.SQS)
+
+
+def record_handler(record: SQSRecord) -> None:
+    """Processa um registro SQS individual — falhas individuais são propagadas."""
+    with tracer.capture_method():
+        event = OrderReceivedEvent.model_validate_json(record.body)
+        order = Order.from_event(event)
+        logger.info("Processing order", order_id=order.order_id)
+        metrics.add_metric(name="OrdersReceived", unit=MetricUnit.Count, value=1)
+        _service.process(order)
+
+
+@logger.inject_lambda_context(log_event=False)    # não logar o evento completo — pode ter dados sensíveis
+@tracer.capture_lambda_handler
+@metrics.log_metrics(capture_cold_start_metric=True)
+def handler(event: dict, context: LambdaContext) -> dict:
+    return process_partial_response(
+        event=event,
+        record_handler=record_handler,
+        processor=processor,
+        context=context,
+    )
+```
+
+### Structured logging
+
+```python
+# Logger injeta automaticamente: function_name, function_version, cold_start, request_id
+logger.info("Order processed", order_id="123", customer_id="456")
+# → {"level": "INFO", "message": "Order processed", "order_id": "123", "customer_id": "456",
+#    "function_name": "order-processor", "cold_start": false, "request_id": "abc-123"}
+
+# Nunca logar dados sensíveis:
+logger.info("Order processed", order_id=order.order_id)  # correto
+logger.info("Event received", event=event)               # ERRADO — pode expor dados sensíveis
+```
+
+### Métricas customizadas (EMF)
+
+```python
+# Métricas emitidas via CloudWatch Embedded Metric Format (EMF)
+metrics.add_metric(name="OrdersProcessed", unit=MetricUnit.Count, value=1)
+metrics.add_metric(name="ProcessingLatencyMs", unit=MetricUnit.Milliseconds, value=elapsed)
+metrics.add_dimension(name="Environment", value=os.environ["ENVIRONMENT"])
+```
+
+### Regras de uso
+
+- `Logger`, `Tracer`, `Metrics` inicializados **no escopo do módulo** (fora do handler) — reutilizados entre invocações aquecidas
+- `log_event=False` em `inject_lambda_context` — não logar o evento completo (pode conter dados sensíveis)
+- `capture_cold_start_metric=True` — métrica de cold start automática
+- `BatchProcessor` com `EventType.SQS` para `ReportBatchItemFailures` automático
+
 ## Linting e formatação
 
 | Ferramenta | Função |
@@ -233,15 +385,32 @@ Configuração mínima no `pyproject.toml` — não duplicar em `.flake8`, `setu
 - [ ] Lockfile reprodutível versionado?
 - [ ] `src/<package>/` layout usado?
 - [ ] Type hints em todo código de produção?
-- [ ] Sem `utils.py` genérico?
-- [ ] Sem lógica de negócio em handler/entrypoint?
+- [ ] Sem `utils.py` genérico — nomenclatura por responsabilidade?
+- [ ] Sem lógica de negócio em handler/entrypoint/router?
 - [ ] pytest configurado e funcionando?
-- [ ] Ruff (ou equivalente) configurado?
+- [ ] Ruff (check + format) configurado no `pyproject.toml`?
+- [ ] Para API: `api/routers/`, `domain/`, `services/`, `repositories/`, `schemas/` separados?
+- [ ] `schemas/` com Pydantic — NÃO expor entidades de domínio diretamente na API?
+- [ ] `settings.py` com `pydantic-settings BaseSettings` para configuração via env vars?
+- [ ] Para Lambda SQS: `message/sqs/consumer/`, `message/sqs/event/`, `domain/`, `infrastructure/`?
+- [ ] `domain/` sem importar `message/` nem `infrastructure/`?
+- [ ] Interfaces via `Protocol` em `domain/repository/` e `domain/service/`?
 - [ ] Handler Lambda fino com service separado? (quando aplicável)
 - [ ] Payloads de evento de teste versionados? (quando Lambda)
-- [ ] `except` com tipo específico?
+- [ ] `except` com tipo específico — nunca `except Exception: pass`?
 - [ ] Sem `import *` em código de produção?
 - [ ] Gerenciamento de contexto com `with` onde aplicável?
+- [ ] Para Lambda: `aws-lambda-powertools` usado para logging, tracing e métricas?
+- [ ] `Logger`, `Tracer`, `Metrics` inicializados no escopo do módulo (fora do handler)?
+- [ ] `log_event=False` no `inject_lambda_context` para não expor dados sensíveis?
+- [ ] `BatchProcessor` com `process_partial_response` para SQS batch com `ReportBatchItemFailures`?
+
+## Modo rápido
+
+Quando acionado com escopo restrito ou instrução explícita de resposta breve, ignore o formato completo abaixo e responda com:
+- **Veredicto**: Idiomático / Ajuste necessário / Problema crítico (uma linha)
+- Máximo 3 bullets com os pontos mais relevantes de Python/ecossistema
+- Ação prioritária em 1 frase
 
 ## Formato de saída obrigatório
 

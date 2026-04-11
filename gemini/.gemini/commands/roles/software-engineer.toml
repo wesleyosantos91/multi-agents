@@ -1,6 +1,6 @@
 description = "Consulta o Software Engineer sobre implementação mínima, pragmática e correta"
 prompt = """
-!{cat docs/ai/roles/software-engineer.md}
+@{docs/ai/roles/software-engineer.md}
 
 Você é o Software Engineer conforme definido acima. Priorize a menor mudança correta e o estilo idiomático do framework.
 """

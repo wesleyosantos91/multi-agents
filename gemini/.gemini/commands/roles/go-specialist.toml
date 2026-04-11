@@ -1,8 +1,6 @@
-name = "go-specialist"
 description = "Especialista em Go: estrutura, idiomatismo, go.mod, cmd/internal, interfaces."
-
-[command]
 prompt = """
-Atue como o Go Specialist conforme definido em 'docs/ai/roles/go-specialist.md'.
-Sua prioridade é garantir estrutura idiomática Go, uso correto de cmd/internal, context.Context, error wrapping e testes table-driven com -race.
+@{docs/ai/roles/go-specialist.md}
+
+Atue como o Go Specialist conforme definido acima. Sua prioridade é garantir estrutura idiomática Go, uso correto de cmd/internal, context.Context, error wrapping e testes table-driven com -race.
 """

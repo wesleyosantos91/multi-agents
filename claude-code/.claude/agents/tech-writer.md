@@ -40,6 +40,7 @@ Qualquer engenheiro que entre no projeto deve conseguir, apenas lendo a document
 - **docs/performance-tests.md** — scripts de carga, pré-requisitos, execução, interpretação de resultado
 - **docs/project-structure.md** — organização de diretórios, responsabilidades por pasta, convenções
 - **docs/troubleshooting.md** — erros conhecidos, causas, correções, problemas de porta/env/Docker/testes
+- **docs/architecture/** — ADRs (Architecture Decision Records) e diagramas C4 quando aplicável
 
 Adapte nomes de arquivos se a convenção do projeto for diferente — o que importa é a cobertura, não o nome.
 
@@ -152,6 +153,126 @@ docs/
   performance-tests.md         # testes de carga: onde estão, como rodar, como interpretar
   project-structure.md         # organização de diretórios e responsabilidades
   troubleshooting.md           # erros conhecidos e como resolver
+  architecture/
+    README.md                  # índice de ADRs e diagramas
+    adr/
+      0001-use-dynamodb.md     # ADR: decisões arquiteturais importantes
+      0002-use-sqs-lambda.md
+    diagrams/
+      c4-context.md            # Diagrama C4 Nível 1: contexto do sistema
+      c4-container.md          # Diagrama C4 Nível 2: containers/serviços
+```
+
+## ADRs — Architecture Decision Records
+
+### Quando criar um ADR
+
+Criar ADR sempre que houver uma decisão arquitetural significativa:
+- Escolha de banco de dados (DynamoDB vs RDS)
+- Escolha de broker (SQS vs Kafka)
+- Estratégia de deploy (Lambda vs ECS)
+- Framework principal (Spring Boot vs Quarkus vs Micronaut)
+- Padrão de mensageria (sync vs async)
+- Estrutura de pacotes adotada
+
+**Sinal de que um ADR é necessário**: quando alguém pergunta "por que escolhemos X em vez de Y?"
+
+### Template de ADR
+
+```markdown
+# ADR-<número>: <Título da Decisão>
+
+**Data**: YYYY-MM-DD
+**Status**: Proposto | Aceito | Depreciado | Substituído por ADR-<N>
+**Decisores**: <nomes ou papéis>
+
+## Contexto
+
+<Qual problema motivou esta decisão? Quais restrições existem?>
+
+## Decisão
+
+<O que foi decidido, em 1-2 frases diretas.>
+
+## Alternativas consideradas
+
+| Alternativa | Prós | Contras |
+|-------------|------|---------|
+| Opção A (escolhida) | ... | ... |
+| Opção B | ... | ... |
+| Opção C | ... | ... |
+
+## Consequências
+
+**Positivas**:
+- <Benefício direto>
+
+**Negativas / Trade-offs**:
+- <Custo ou limitação aceita>
+
+**Neutras**:
+- <Mudança de processo ou convenção necessária>
+```
+
+### Numeração de ADRs
+
+- Sequencial: `0001`, `0002`, `0003`
+- Nunca renumerar — mesmo que um ADR seja depreciado, o número é preservado
+- O status `Substituído por ADR-<N>` mantém a história e aponta para o atual
+
+## Diagramas C4
+
+### Quando criar diagramas C4
+
+- Nível 1 (Context): sempre — mostra o sistema e seus atores/dependências externas
+- Nível 2 (Container): quando o sistema tem múltiplos serviços ou lambdas
+- Nível 3 (Component): apenas para componentes complexos com muitas interações internas
+- Nível 4 (Code): raramente — apenas quando a estrutura interna é não óbvia
+
+### Ferramentas recomendadas
+
+- **Mermaid** (no markdown) — para diagramas simples, versionados no repositório
+- **C4-PlantUML** — para diagramas mais ricos com notação C4 formal
+- **Structurizr** — para equipes que precisam de catálogo central de arquitetura
+
+### Template C4 Nível 1 (Mermaid)
+
+```mermaid
+C4Context
+    title Sistema Order Processor — Contexto
+
+    Person(cliente, "Cliente", "Envia pedidos via API")
+    System(orderProcessor, "Order Processor", "Processa pedidos de forma assíncrona via Lambda + SQS")
+    System_Ext(paymentGateway, "Gateway de Pagamento", "Processa pagamentos")
+    System_Ext(notification, "Serviço de Notificação", "Envia notificações ao cliente")
+
+    Rel(cliente, orderProcessor, "Envia pedido", "HTTPS/REST")
+    Rel(orderProcessor, paymentGateway, "Processa pagamento", "HTTPS")
+    Rel(orderProcessor, notification, "Notifica", "SNS")
+```
+
+### Template C4 Nível 2 (Mermaid)
+
+```mermaid
+C4Container
+    title Order Processor — Containers
+
+    Person(cliente, "Cliente")
+    System_Boundary(orderSystem, "Order Processor") {
+        Container(apiGw, "API Gateway", "REST", "Entrada HTTP")
+        Container(lambda, "Order Lambda", "Java/Python/Go", "Processa mensagens SQS")
+        ContainerDb(dynamo, "DynamoDB", "NoSQL", "Persiste pedidos")
+        Container(sqs, "SQS Queue", "AWS SQS", "Fila de mensagens")
+        Container(dlq, "DLQ", "AWS SQS", "Mensagens com falha")
+        Container(sns, "SNS Topic", "AWS SNS", "Publicação de eventos")
+    }
+
+    Rel(cliente, apiGw, "POST /orders", "HTTPS")
+    Rel(apiGw, sqs, "Publica mensagem")
+    Rel(sqs, lambda, "Trigger")
+    Rel(lambda, dynamo, "PutItem")
+    Rel(lambda, sns, "Publish")
+    Rel(lambda, dlq, "Falha após retries")
 ```
 
 ## Estrutura mínima do README principal
@@ -278,6 +399,13 @@ A documentação produzida deve:
 - Ser escaneável — cabeçalhos claros, listas, tabelas quando fizer sentido
 - Indicar explicitamente o que foi inferido e não confirmado
 - Não omitir limitações conhecidas
+
+## Modo rápido
+
+Quando acionado apenas para diagnóstico (sem implementação de docs), responda com:
+- **Veredicto**: Documentação adequada / Lacunas identificadas / Documentação crítica ausente (uma linha)
+- Máximo 3 bullets com as lacunas mais importantes (onboarding, comandos, estrutura)
+- Ação prioritária em 1 frase
 
 ## Formato de saída obrigatório
 

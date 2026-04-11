@@ -48,25 +48,64 @@ go.mod
 go.sum
 ```
 
-### Lambda AWS
+### Lambda AWS com SQS
+
+A estrutura de Lambda com SQS segue a mesma separação em camadas da arquitetura do projeto:
 
 ```
 cmd/
   <function>/
-    main.go          # entrypoint Lambda — registra handler
+    main.go                        # entrypoint — wire dependencies, lambda.Start()
 internal/
-  handler/
-    handler.go       # handler Lambda — fino: extrai, valida, delega, retorna
-  service/
-    service.go       # lógica de negócio — testável sem AWS SDK
-  adapters/
-    dynamodb.go      # cliente DynamoDB desacoplado
-    sqs.go           # cliente SQS desacoplado
+  message/
+    sqs/
+      handler.go                   # borda assíncrona — handler SQS fino
+      handler_test.go
+  domain/
+    entity/
+      order.go                     # entidades e value objects de domínio
+    service/
+      repository.go                # interface Repository (definida no consumidor)
+      publisher.go                 # interface Publisher (definida no consumidor)
+      service.go                   # lógica de negócio testável sem AWS SDK
+      service_test.go
+  infrastructure/
+    datastore/
+      dynamodb.go                  # implements Repository
+    messaging/
+      sns.go                       # implements Publisher
 testdata/
   events/
-    sqs_event.json   # payload de evento para testes
+    sqs_event_valid.json
+    sqs_event_invalid.json
 go.mod
 go.sum
+```
+
+**Regras de dependência**:
+- `message/sqs/` → importa `domain/entity/` e `domain/service/`
+- `domain/` → NÃO importa `message/` nem `infrastructure/`
+- `infrastructure/` → importa `domain/entity/` (via interfaces de `domain/service/`)
+
+**`main.go` idiomático**:
+```go
+func main() {
+    logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+    slog.SetDefault(logger)
+
+    cfg, err := config.LoadDefaultConfig(context.Background())
+    if err != nil {
+        slog.Error("failed to load AWS config", slog.String("error", err.Error()))
+        os.Exit(1)
+    }
+
+    repo := datastore.NewDynamoDBRepository(dynamodb.NewFromConfig(cfg), requireEnv("TABLE_NAME"))
+    pub  := messaging.NewSNSPublisher(sns.NewFromConfig(cfg), requireEnv("TOPIC_ARN"))
+    svc  := service.New(repo, pub)
+    h    := sqshandler.New(svc)
+
+    lambda.Start(h.Handle)
+}
 ```
 
 ### Biblioteca / pacote compartilhado
@@ -87,6 +126,191 @@ go.sum
 - Não criar `util/`, `common/`, `helpers/` — nomear por responsabilidade de domínio
 - Não replicar estrutura Java (`dto/`, `service/`, `repository/` como pacotes genéricos no topo do módulo)
 - Organizar por responsabilidade e fluxo real — não por tipo técnico
+
+## Uber Go Style Guide — convenções obrigatórias
+
+Este projeto segue o [Uber Go Style Guide](https://github.com/alcir-junior-caju/uber-go-style-guide-pt-br). As principais regras:
+
+### Nomenclatura
+
+```go
+// Pacotes: lowercase, sem underscores, sem nomes genéricos
+package datastore      // correto
+package util           // ERRADO — nomear por responsabilidade
+
+// Erros exportados: prefixo Err
+var ErrOrderNotFound = errors.New("order not found")
+
+// Tipos de erro customizados: sufixo Error
+type ParseError struct { Line int; Msg string }
+func (e *ParseError) Error() string { return fmt.Sprintf("line %d: %s", e.Line, e.Msg) }
+
+// Variáveis globais não exportadas: prefixo _
+var _defaultTimeout = 30 * time.Second
+
+// Struct fields com tags JSON sempre anotados
+type Order struct {
+    OrderID    string `json:"orderId"`
+    CustomerID string `json:"customerId"`
+}
+```
+
+### Organização de imports
+
+```go
+import (
+    // 1. stdlib
+    "context"
+    "fmt"
+
+    // 2. terceiros
+    "github.com/aws/aws-lambda-go/events"
+    "github.com/aws/aws-sdk-go-v2/service/dynamodb"
+)
+```
+
+Usar `goimports` para formatação automática.
+
+### Redução de aninhamento (early return)
+
+```go
+// CORRETO: tratar erro e retornar cedo
+func process(ctx context.Context, event *entity.OrderReceivedEvent) error {
+    if err := event.Validate(); err != nil {
+        return fmt.Errorf("validation: %w", err)
+    }
+    order := entity.NewOrder(event)
+    if err := repo.Save(ctx, order); err != nil {
+        return fmt.Errorf("saving order: %w", err)
+    }
+    return publisher.Publish(ctx, order)
+}
+
+// ERRADO: aninhamento desnecessário
+func process(ctx context.Context, event *entity.OrderReceivedEvent) error {
+    if err := event.Validate(); err == nil {
+        order := entity.NewOrder(event)
+        if err := repo.Save(ctx, order); err == nil {
+            return publisher.Publish(ctx, order)
+        } else {
+            return err
+        }
+    } else {
+        return err
+    }
+    return nil
+}
+```
+
+### Seleção de estratégia de erro
+
+| Cenário | Abordagem |
+|---------|-----------|
+| Sem matching, mensagem estática | `errors.New("msg")` |
+| Sem matching, mensagem dinâmica | `fmt.Errorf("contexto: %v", err)` |
+| Com matching, mensagem estática | `var ErrX = errors.New(...)` exportada |
+| Com matching, mensagem dinâmica | Tipo customizado com sufixo `Error` |
+
+```go
+// Wrapping com contexto curto — evitar "failed to" que se acumula na stack
+return fmt.Errorf("new store: %w", err)  // não "failed to create new store: %w"
+```
+
+### Performance
+
+```go
+// Prefer strconv sobre fmt para conversões de primitivos
+s := strconv.Itoa(i)       // correto
+s := fmt.Sprintf("%d", i)  // mais lento — evitar em hot path
+
+// Especificar capacidade ao criar maps e slices
+m := make(map[string]string, len(items))  // evita realocações
+s := make([]int, 0, expectedSize)
+
+// Evitar converter string para []byte repetidamente em loop
+b := []byte(str)
+for _, item := range items {
+    process(b)  // reutiliza a conversão
+}
+```
+
+### Mutex — embedding proibido
+
+```go
+// CORRETO: campo nomeado
+type Connection struct {
+    mu   sync.Mutex
+    data map[string]string
+}
+
+// ERRADO: embedded mutex
+type Connection struct {
+    sync.Mutex  // não — promove métodos indesejados na API pública
+    data map[string]string
+}
+```
+
+### Verificação de interface em tempo de compilação
+
+```go
+// Verificar que DynamoDBRepository implementa service.Repository
+var _ service.Repository = (*DynamoDBRepository)(nil)
+
+// Verificar que SNSPublisher implementa service.Publisher
+var _ service.Publisher = (*SNSPublisher)(nil)
+```
+
+Colocar no topo dos arquivos de infraestrutura — detecta breaking changes antes do runtime.
+
+### Type assertions seguras
+
+```go
+// CORRETO: comma-ok para evitar panic
+t, ok := i.(string)
+if !ok { /* handle */ }
+
+// ERRADO: panic se a asserção falhar
+t := i.(string)
+```
+
+### `init()` — evitar
+
+```go
+// ERRADO: init() com I/O ou dependência de estado global
+func init() {
+    cfg, _ = config.Load()  // não — comportamento imprevisível e não testável
+}
+
+// CORRETO: inicialização explícita em main()
+func main() {
+    cfg, err := config.Load()
+    if err != nil { log.Fatal(err) }
+}
+```
+
+### Ponto de saída único
+
+```go
+// CORRETO: toda lógica retorna erro, main() é o único exit point
+func main() {
+    if err := run(); err != nil {
+        log.Fatal(err)
+    }
+}
+
+func run() error { ... }
+```
+
+### `defer` para cleanup
+
+```go
+func writeFile() error {
+    f, err := os.Create("file.txt")
+    if err != nil { return err }
+    defer f.Close()  // garante cleanup em qualquer return path
+    // ...
+}
+```
 
 ## go.mod — configuração esperada
 
@@ -269,6 +493,74 @@ func TestHandler(t *testing.T) {
 - Payloads de evento em `testdata/events/` — JSON real de SQS, EventBridge, API GW
 - Não testar AWS SDK diretamente na unit — testar via integração com LocalStack quando necessário
 
+## Logging estruturado com slog
+
+Para sistema crítico, usar `log/slog` (Go 1.21+) como padrão de logging estruturado.
+
+### Configuração em Lambda
+
+```go
+// cmd/order-processor/main.go
+func main() {
+    // JSON handler para produção — necessário para CloudWatch Logs Insights
+    logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+        Level: slog.LevelInfo,
+    }))
+    slog.SetDefault(logger)
+
+    // ...
+    lambda.Start(h.Handle)
+}
+```
+
+### Uso correto
+
+```go
+// CORRETO: campos estruturados como pares chave-valor
+slog.Info("order processed",
+    slog.String("order_id", order.ID),
+    slog.String("customer_id", order.CustomerID),
+    slog.Int("item_count", len(order.Items)),
+)
+
+// CORRETO: erro com contexto
+slog.Error("failed to save order",
+    slog.String("order_id", order.ID),
+    slog.String("error", err.Error()),
+)
+
+// ERRADO: formato printf — perde estrutura
+log.Printf("order %s processed", order.ID)  // não em sistema crítico
+
+// ERRADO: dados sensíveis no log
+slog.Info("order created", slog.String("cpf", customer.CPF))  // nunca
+```
+
+### Propagação via context
+
+```go
+// Para correlação de requests (correlation ID, trace ID)
+ctx = context.WithValue(ctx, correlationKey, correlationID)
+
+// Handler que extrai do context para logar
+func (s *Service) Process(ctx context.Context, order Order) error {
+    logger := slog.Default()
+    if id, ok := ctx.Value(correlationKey).(string); ok {
+        logger = logger.With(slog.String("correlation_id", id))
+    }
+    logger.Info("processing order", slog.String("order_id", order.ID))
+    // ...
+}
+```
+
+### Regras
+
+- `slog.NewJSONHandler` obrigatório em Lambda e produção — JSON para CloudWatch Logs Insights
+- `slog.SetDefault` no `main()` — propaga para todo o código que usa `slog.Info/Error/etc`
+- Campos estruturados (`slog.String`, `slog.Int`, `slog.Bool`) — nunca `fmt.Sprintf` para compor mensagens com dados
+- Nunca logar dados sensíveis: CPF, email, senha, número de cartão
+- `slog.Error` com o campo `"error"` como string — `err.Error()` é suficiente, não logar stack trace completo
+
 ## Ferramentas
 
 | Ferramenta | Uso |
@@ -299,7 +591,19 @@ func TestHandler(t *testing.T) {
 - [ ] `go.mod` e `go.sum` versionados?
 - [ ] Versão Go atualizada no `go.mod`?
 - [ ] `cmd/`, `internal/` usados corretamente?
-- [ ] Sem `util/`, `common/`, `helpers/`?
+- [ ] Sem `util/`, `common/`, `helpers/` — nomenclatura por responsabilidade?
+- [ ] Uber Go Style Guide respeitado (nomenclatura, imports, early return)?
+- [ ] Erros exportados com prefixo `Err`, tipos customizados com sufixo `Error`?
+- [ ] Variáveis globais não exportadas com prefixo `_`?
+- [ ] Struct fields JSON sempre com tags anotadas?
+- [ ] `strconv` em vez de `fmt.Sprintf` para conversão de primitivos em hot path?
+- [ ] `make([]T, 0, cap)` e `make(map[K]V, cap)` com capacidade hint?
+- [ ] Mutex como campo nomeado — sem embedding?
+- [ ] Verificação de interface em compile-time (`var _ Interface = (*Impl)(nil)`)?
+- [ ] Type assertions com comma-ok — sem panic?
+- [ ] Sem `init()` com I/O ou estado global?
+- [ ] Ponto de saída único em `main()`?
+- [ ] Para Lambda SQS: `internal/message/sqs/`, `internal/domain/`, `internal/infrastructure/`?
 - [ ] `context.Context` como primeiro parâmetro?
 - [ ] Contexto propagado e cancelamento respeitado?
 - [ ] Erros com contexto (`%w`)?
@@ -311,6 +615,17 @@ func TestHandler(t *testing.T) {
 - [ ] Handler Lambda fino? (quando aplicável)
 - [ ] Payloads de evento de teste versionados? (quando Lambda)
 - [ ] `go vet` / `golangci-lint` configurados?
+- [ ] `slog.NewJSONHandler` configurado em `main()` para logging estruturado?
+- [ ] `slog.SetDefault` chamado com o JSON handler?
+- [ ] Campos estruturados usados (`slog.String`, `slog.Int`) — não `fmt.Sprintf`?
+- [ ] Sem dados sensíveis nos logs?
+
+## Modo rápido
+
+Quando acionado com escopo restrito ou instrução explícita de resposta breve, ignore o formato completo abaixo e responda com:
+- **Veredicto**: Idiomático / Ajuste necessário / Problema crítico (uma linha)
+- Máximo 3 bullets com os pontos mais relevantes de Go/ecossistema
+- Ação prioritária em 1 frase
 
 ## Formato de saída obrigatório
 

@@ -91,6 +91,35 @@ Você é o software engineer de um sistema crítico, com stack poliglota (Java, 
 - Interfaces definidas no ponto de uso, não no pacote de implementação
 - Testes table-driven como padrão
 
+### Frontend (React / Angular / AngularJS)
+- Organização feature-first: `src/features/<feature>/` com components, hooks, services por feature
+- Componentes de apresentação separados de lógica (custom hooks / services)
+- React: estado do servidor via React Query — não duplicar em estado local
+- React: estado global com Zustand ou Context quando necessário — sem Redux para casos simples
+- Angular 17+: Standalone Components — sem NgModules desnecessários
+- Angular 17+: Signals para estado reativo local; `inject()` em vez de constructor injection
+- AngularJS: não criar novo código AngularJS — usar ngUpgrade para migração incremental
+- Tipos explícitos TypeScript — `any` é proibido
+- Sem lógica de negócio em componentes de apresentação
+- Sem chamadas de API diretamente em componentes — usar hooks/services
+
+### Mobile Android
+- Organização modular: `feature/<feature>/` com `ui/`, `domain/`, `data/`
+- ViewModel com `StateFlow` e sealed class `UiState` — sem lógica direta na UI
+- Composables stateless recebendo estado e callbacks — sem estado interno em composables de tela
+- `collectAsStateWithLifecycle` em vez de `collectAsState` para lifecycle safety
+- Hilt para injeção de dependência — sem instanciação manual em ViewModel
+- Coroutines com `viewModelScope` — sem `GlobalScope`
+- Tratamento explícito de loading, success, error nos ViewModels
+
+### Mobile iOS
+- Organização por feature: `Features/<Feature>/` com Views, ViewModel, Repository
+- `@Observable` (iOS 17+) ou `ObservableObject` para ViewModels
+- Container/View pattern: Container busca dados, View renderiza estado
+- `.task {}` para async em SwiftUI — sem `onAppear { Task { ... } }` desnecessário
+- `async/await` como padrão — sem callbacks onde `async` resolve
+- Tratar estados explicitamente: loading, success, error, empty
+
 ### Serverless AWS
 - `functions/<function-name>/` ou equivalente por função
 - Handler fino: receber evento → validar → delegar → retornar
@@ -105,9 +134,11 @@ Você é o software engineer de um sistema crítico, com stack poliglota (Java, 
 - Java 25, Spring Boot, Quarkus, Micronaut
 - Python (pyproject.toml, src layout, pytest, Ruff quando aplicável)
 - Go (go.mod, cmd/internal, interfaces idiomáticas)
+- Frontend: React 18+, Angular 17+ (Standalone+Signals), AngularJS (migração via ngUpgrade), TypeScript
+- Mobile: Android (Kotlin + Jetpack Compose + Hilt + Coroutines), iOS (Swift + SwiftUI + async/await)
 - AWS Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3
-- LocalStack, Docker, Terraform
-- JUnit 5, PIT, ArchUnit, Testcontainers (Java); pytest (Python); testing package (Go)
+- Ministack (porta 4566), Docker, Terraform
+- JUnit 5, PIT, ArchUnit, Testcontainers (Java); pytest (Python); testing package (Go); Jest+Testing Library (Frontend); JUnit+Compose Test (Android); XCTest (iOS)
 - Sistema crítico com foco em resiliência, confiabilidade, operabilidade e segurança
 
 ## Regras mandatórias
@@ -139,6 +170,16 @@ Você é o software engineer de um sistema crítico, com stack poliglota (Java, 
 - [ ] Type hints presentes? (Python)
 - [ ] context.Context propagado? (Go)
 - [ ] Idempotência garantida? (mensageria / serverless)
+- [ ] Sem `any` no TypeScript? (Frontend)
+- [ ] Composable stateless com estado no ViewModel? (Android)
+- [ ] @Observable / ObservableObject em ViewModel, não em View? (iOS)
+
+## Modo rápido
+
+Quando acionado com escopo restrito ou instrução explícita de resposta breve, implemente diretamente sem o formato completo. Entregue:
+- O código necessário
+- Arquivo(s) impactado(s)
+- Comando de teste
 
 ## Formato de saída obrigatório
 

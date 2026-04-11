@@ -290,31 +290,197 @@ tasks.withType<Test> {
 
 ## Lambda AWS com Java
 
+### Estrutura de pacotes obrigatória para Lambda com SQS
+
+A organização de pacotes segue a arquitetura em camadas do projeto, separando borda assíncrona, domínio e infraestrutura:
+
 ```
 src/
   main/
-    java/<package>/
-      handler/
-        OrderHandler.java    # handler Lambda — fino: extrai, valida, delega, retorna
-      service/
-        OrderService.java    # lógica de negócio — testável sem AWS SDK
-      adapters/
-        DynamoDbOrderRepository.java
-        SqsEventPublisher.java
+    java/<base-package>/
+      message/
+        sqs/
+          consumer/
+            OrderConsumer.java       # borda assíncrona — handler Lambda fino
+          event/
+            OrderReceivedEvent.java  # schema do corpo da mensagem SQS (record)
+            OrderItemEvent.java      # tipo aninhado do evento (record)
+      domain/
+        entity/
+          Order.java                 # entidade de domínio (record imutável)
+          OrderItem.java             # valor de domínio (record imutável)
+        repository/
+          OrderRepository.java       # interface — sem anotação de framework
+        service/
+          OrderPublisher.java        # interface — sem anotação de framework
+          OrderService.java          # lógica de negócio — testável sem AWS SDK
+      infrastructure/
+        datastore/
+          DynamoDbOrderRepository.java   # implements OrderRepository
+        messaging/
+          SnsOrderPublisher.java         # implements OrderPublisher
+        config/
+          AwsConfig.java                 # configuração de clientes AWS
   test/
-    java/<package>/
-      handler/
-        OrderHandlerTest.java
+    java/<base-package>/
+      domain/
+        service/
+          OrderServiceTest.java
+      message/
+        sqs/
+          consumer/
+            OrderConsumerTest.java
     resources/
       events/
-        sqs_event.json       # payload de evento para testes
+        sqs_event_valid.json       # payload real de SQS para testes
+        sqs_event_invalid.json
 ```
 
-- Handler fino: `handleRequest(event, context)` → extrair → validar → delegar para service → retornar
-- Lógica de negócio em `service/` — testável com mocks sem AWS SDK
-- Clientes AWS em `adapters/` — injetados via construtor para testabilidade
-- `context.Context` não existe em Java Lambda — usar `com.amazonaws.services.lambda.runtime.Context` apenas para logging e metadata
-- SnapStart (Quarkus, Spring AOT, CRaC) para reduzir cold start quando necessário
+### Regras de dependência entre camadas
+
+```
+message/sqs/consumer/  → pode importar domain/ e message/sqs/event/
+domain/                → NÃO importa message/ nem infrastructure/
+infrastructure/        → importa domain/ (via interfaces)
+```
+
+O `OrderConsumer` faz o mapeamento de `OrderReceivedEvent` → entidade de domínio antes de chamar o service. O `domain/` permanece sem dependência de qualquer framework ou borda.
+
+### Responsabilidades por classe
+
+| Classe | Responsabilidade |
+|--------|----------------|
+| `OrderConsumer` | Receber `SQSEvent`, deserializar, mapear para domínio, delegar ao service, retornar `SQSBatchResponse` com `ReportBatchItemFailures` |
+| `OrderReceivedEvent` | Record com schema exato do corpo da mensagem SQS — validação no compact constructor |
+| `Order` / `OrderItem` | Records de domínio imutáveis — sem anotações de framework |
+| `OrderRepository` | Interface sem anotação — `infrastructure/datastore/` implementa |
+| `OrderPublisher` | Interface sem anotação — `infrastructure/messaging/` implementa |
+| `OrderService` | Lógica de negócio — testável com mocks sem AWS SDK |
+| `DynamoDbOrderRepository` | PutItem com `ConditionExpression: attribute_not_exists(orderId)` para idempotência |
+| `SnsOrderPublisher` | Publish no SNS com `MessageAttributes` para filtragem |
+
+### Idiomatismo por framework na Lambda
+
+**Quarkus**
+```java
+@Named("orderConsumer")               // nome do bean == quarkus.lambda.handler
+@RegisterForReflection                 // necessário para native image
+public class OrderConsumer implements RequestHandler<SQSEvent, SQSEvent.SQSBatchResponse> {
+    @Inject OrderService orderService;
+}
+```
+`application.properties`: `quarkus.lambda.handler=orderConsumer`
+
+**Spring Boot**
+```java
+@Component("orderConsumer")           // nome do bean == cloud.function.definition
+public class OrderConsumer implements Function<SQSEvent, SQSEvent.SQSBatchResponse> {
+    // constructor injection
+}
+```
+`application.yml`: `cloud.function.definition: orderConsumer`
+
+**Micronaut**
+```java
+public class OrderConsumer extends MicronautRequestHandler<SQSEvent, SQSEvent.SQSBatchResponse> {
+    @Inject OrderService orderService;
+    @Override public SQSEvent.SQSBatchResponse execute(SQSEvent event) { ... }
+}
+```
+
+### Boas práticas de Lambda Java
+
+- `OrderConsumer` fino: deserializar → mapear → delegar → coletar falhas → retornar
+- `ReportBatchItemFailures` obrigatório — falha por mensagem, não por batch inteiro
+- Idempotência via `ConditionExpression: attribute_not_exists(orderId)` no DynamoDB
+- `System.getenv()` para variáveis de ambiente — não hardcoded, não `@Value` no handler
+- SnapStart (Quarkus, Spring AOT, CRaC) para reduzir cold start em JVM
+- Native image (GraalVM) para cold start mínimo — ativar via profile `native`
+
+### AWS Lambda Powertools for Java
+
+Para observabilidade em Lambda Java, usar `aws-lambda-powertools-java`:
+
+```xml
+<!-- pom.xml — via BOM do Powertools -->
+<dependency>
+    <groupId>software.amazon.lambda</groupId>
+    <artifactId>powertools-logging</artifactId>
+</dependency>
+<dependency>
+    <groupId>software.amazon.lambda</groupId>
+    <artifactId>powertools-tracing</artifactId>
+</dependency>
+<dependency>
+    <groupId>software.amazon.lambda</groupId>
+    <artifactId>powertools-metrics</artifactId>
+</dependency>
+```
+
+```java
+// Handler com Powertools
+public class OrderConsumer implements RequestHandler<SQSEvent, SQSBatchResponse> {
+
+    @Inject OrderService orderService;
+
+    @Logging(logEvent = false)   // não logar o evento completo — pode ter dados sensíveis
+    @Tracing
+    @Metrics(namespace = "OrderProcessor", captureColdStart = true)
+    @Override
+    public SQSBatchResponse handleRequest(SQSEvent event, Context context) {
+        // ReportBatchItemFailures
+        var failures = new ArrayList<SQSBatchResponse.BatchItemFailure>();
+        for (var record : event.getRecords()) {
+            try {
+                processRecord(record);
+            } catch (Exception e) {
+                Logger.logStructured("Failed to process record",
+                    Map.of("messageId", record.getMessageId(), "error", e.getMessage()));
+                failures.add(new SQSBatchResponse.BatchItemFailure(record.getMessageId()));
+            }
+        }
+        return new SQSBatchResponse(failures);
+    }
+}
+```
+
+### Logging estruturado com SLF4J + Logback
+
+Para serviços não-Lambda (ECS, containers), usar SLF4J + Logback com JSON estruturado em produção:
+
+```xml
+<!-- logback-spring.xml -->
+<configuration>
+    <springProfile name="!local">
+        <!-- JSON estruturado em produção -->
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+        <root level="INFO"><appender-ref ref="JSON"/></root>
+    </springProfile>
+    <springProfile name="local">
+        <!-- Human-readable em desenvolvimento -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder><pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n</pattern></encoder>
+        </appender>
+        <root level="DEBUG"><appender-ref ref="CONSOLE"/></root>
+    </springProfile>
+</configuration>
+```
+
+### GraalVM Native Image — trade-offs
+
+| Aspecto | JVM (com SnapStart) | Native Image (GraalVM) |
+|---------|---------------------|------------------------|
+| Cold start | 1-3s (JVM) / ~200ms (SnapStart) | ~50-100ms |
+| Throughput | Alto (JIT compilado) | Ligeiramente menor (AOT) |
+| Compatibilidade | Alta — qualquer lib | Requer configuração de reflection |
+| Build time | 1-5min | 5-20min (build pesado) |
+| Debug | Fácil | Mais complexo |
+| Recomendação | SnapStart primeiro | Quando cold start < 100ms é requisito |
+
+**Quarkus native**: `./mvnw package -Pnative` — requer GraalVM instalado ou mandrel.
+**Spring AOT**: `./mvnw spring-boot:build-image -Pnative` — spring-boot-3.x com GraalVM.
 
 ## Testes — JUnit 5
 
@@ -359,7 +525,7 @@ class OrderServiceTest {
 
 ### ArchUnit — testes de arquitetura
 ```java
-@AnalyzeClasses(packages = "com.example")
+@AnalyzeClasses(packages = "io.github.wesleyosantos91")
 class ArchitectureTest {
 
     @ArchTest
@@ -369,16 +535,28 @@ class ArchitectureTest {
             .resideInAPackage("..infrastructure..");
 
     @ArchTest
+    static final ArchRule domainShouldNotDependOnMessage =
+        noClasses().that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..message..");
+
+    @ArchTest
     static final ArchRule messageShouldNotBeInsideInfrastructure =
         noClasses().that().resideInAPackage("..message..")
             .should().resideInAPackage("..infrastructure..");
+
+    @ArchTest
+    static final ArchRule infrastructureShouldImplementDomainInterfaces =
+        classes().that().resideInAPackage("..infrastructure.datastore..")
+            .should().implement(JavaClass.Predicates.resideInAPackage("..domain.repository.."));
 }
 ```
 
-- Validar boundaries entre camadas
+- Validar boundaries entre camadas — `domain/` completamente isolado de `message/` e `infrastructure/`
 - Validar que `message/` não está dentro de `infrastructure/`
-- Validar que `domain/` não depende de `infrastructure/`
+- Validar que `infrastructure/datastore/` implementa interfaces de `domain/repository/`
 - Validar nomenclatura de classes por pacote quando relevante
+- Substituir `"com.example"` pelo base package real do projeto (`io.github.wesleyosantos91` neste projeto)
 
 ## Regras mandatórias
 
@@ -398,7 +576,12 @@ class ArchitectureTest {
 - [ ] Estrutura de pacotes aderente ao padrão (`web/`, `message/`, `domain/`, `core/`, `infrastructure/`)?
 - [ ] `message/` no mesmo nível que `web/` — fora de `infrastructure/`?
 - [ ] `core/` sem regras de negócio?
-- [ ] `domain/` sem dependências de `infrastructure/`?
+- [ ] `domain/` sem dependências de `infrastructure/` e sem dependências de `message/`?
+- [ ] Para Lambda SQS: `message/sqs/consumer/`, `message/sqs/event/`, `domain/entity/`, `domain/repository/`, `domain/service/`, `infrastructure/datastore/`, `infrastructure/messaging/`, `infrastructure/config/`?
+- [ ] Interfaces `OrderRepository` e `OrderPublisher` sem anotações de framework (pura Java)?
+- [ ] `infrastructure/` implementa interfaces de `domain/` (não o contrário)?
+- [ ] Mapeamento `OrderReceivedEvent` → entidade de domínio no consumer (não no service)?
+- [ ] `ReportBatchItemFailures` habilitado no event source mapping?
 - [ ] Java 25 usado idiomaticamente (records, sealed, pattern matching, text blocks)?
 - [ ] Framework respeitado (Spring Boot / Quarkus / Micronaut) — sem mistura de idiomas?
 - [ ] `maven-compiler-source` / `maven-compiler-target` alinhados com Java 25?
@@ -409,6 +592,19 @@ class ArchitectureTest {
 - [ ] Testcontainers para testes de integração?
 - [ ] Handler Lambda fino com service separado? (quando aplicável)
 - [ ] Payloads de evento de teste versionados? (quando Lambda)
+- [ ] `aws-lambda-powertools-java` usado para logging, tracing e métricas? (quando Lambda)
+- [ ] `@Logging(logEvent=false)` para não expor dados sensíveis no log do evento?
+- [ ] `@Metrics(captureColdStart=true)` para rastrear cold starts?
+- [ ] SLF4J + Logback com JSON estruturado em produção (logback-spring.xml)?
+- [ ] GraalVM native image considerado quando cold start < 200ms é requisito de SLA?
+- [ ] SnapStart considerado antes de native image (menor custo de build)?
+
+## Modo rápido
+
+Quando acionado com escopo restrito ou instrução explícita de resposta breve, ignore o formato completo abaixo e responda com:
+- **Veredicto**: Idiomático / Ajuste necessário / Problema crítico (uma linha)
+- Máximo 3 bullets com os pontos mais relevantes de Java/framework
+- Ação prioritária em 1 frase
 
 ## Formato de saída obrigatório
 
