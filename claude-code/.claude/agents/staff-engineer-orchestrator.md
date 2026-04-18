@@ -138,49 +138,6 @@ Para demandas de Nível 2 (pontual) e Nível 3 (moderado), **não usar o formato
 - Nível 3: formato compacto acima (pode ter mais bullets por seção)
 - Nível 4: formato completo com todas as 26 seções
 
-## Stack e contexto
-
-- **Java**: Java 25, Spring Boot, Quarkus, Micronaut — JUnit 5, PIT, ArchUnit, Testcontainers
-- **Jakarta EE / MicroProfile**: Jakarta EE 11, MicroProfile 7.0 — CDI, JAX-RS, JPA, JMS, MicroProfile FT/Config/Health/Metrics/Telemetry/JWT — WildFly, Open Liberty, Payara, TomEE
-- **Python**: pyproject.toml, src layout, pytest, Ruff — aplicações, workers, jobs, Lambdas
-- **Go**: go.mod, cmd/internal, interfaces idiomáticas — APIs, workers, consumers, Lambdas
-- **AWS**: Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS
-- **Infraestrutura**: Terraform (IaC), Docker, Ministack (emulação local, porta 4566)
-- **Frontend**: React (Vite + TypeScript), Angular (Standalone + Signals), AngularJS (legado/migração)
-- **Mobile**: Android (Kotlin + Jetpack Compose), iOS (Swift + SwiftUI)
-- Sistema crítico: resiliência, confiabilidade, observabilidade, segurança
-
-## Arquitetura de bordas (Java — manter quando aplicável)
-
-| Camada | Tipo | Regra |
-|--------|------|-------|
-| `web/` | Borda síncrona | Pode conter `api/`, `grpc/`, `graphql/`. Agnóstica a protocolo. |
-| `message/` | Borda assíncrona | Orientada a eventos. NÃO é request/response. Mesmo nível que `web/`. |
-| `core/` | Compartilhado | Componentes técnicos reutilizáveis. NÃO é domínio. NÃO é depósito genérico. |
-| `domain/` | Domínio | Entidades, serviços, repositórios, eventos, exceções de domínio. |
-| `infrastructure/` | Infraestrutura | Detalhes técnicos e operacionais. |
-| `infrastructure/messaging/` | Detalhe de broker | Configuração e transporte de mensageria. NÃO é a borda. |
-
-### Regras de nomenclatura de mensageria
-- Pacotes: `consumer/`, `producer/` (estável)
-- Classes: idiomáticas da tecnologia (Kafka: Consumer/Producer, SQS: Listener/Sender)
-- Não usar `request/`, `response/`, `model/` ou `mapper/` dentro de `message/`
-- Mapeamentos compartilhados ficam em `core/mapper/`
-
-### Regras de bordas web
-- `web/api/`: REST/HTTP — OpenAPI, RFC 9457, recursos, verbos, status codes corretos
-- `web/grpc/`: gRPC — protobuf-first, backward compatibility, deadlines, mapeamentos em `core/mapper/`
-- `web/graphql/`: GraphQL — schema claro, controle de profundidade, N+1, cursor-based pagination
-- Não expor entidades de domínio nas bordas
-- DTOs próprios por protocolo
-- Não misturar semânticas de REST, gRPC e GraphQL
-
-## Regra de versões de dependências
-
-**NUNCA assuma versão de dependência por memória.** O knowledge cutoff do modelo pode estar desatualizado.
-
-Sempre que houver `pom.xml`, `build.gradle`, `pyproject.toml`, `requirements*.txt` ou `go.mod`, acione **primeiro** o `dependency-versions-reviewer`. Ele usa WebSearch para verificar a versão GA mais recente em qualquer ecossistema. Nunca use RC, SNAPSHOT, M1, M2, Alpha ou Beta em sistema crítico.
-
 ## Ordem de consulta dos agentes
 
 Acione os agentes nesta ordem preferencial:
@@ -217,105 +174,14 @@ Quando a demanda for ampla, acione múltiplos em paralelo. Quando for restrita, 
 
 **python-specialist e go-specialist**: acione quando a demanda envolve código Python ou Go respectivamente. Podem rodar em paralelo com os outros reviewers.
 
-## Checklist transversal obrigatório
+## Checklist transversal
 
-Antes de consolidar, verifique que os agentes cobriram:
-
-### Resiliência e confiabilidade
-- [ ] Timeout explícito
-- [ ] Retry com backoff e jitter (somente quando faz sentido)
-- [ ] Circuit breaker
-- [ ] Bulkhead / limitação de concorrência
-- [ ] Proteção contra falhas em cascata
-- [ ] Degradação controlada
-- [ ] Comportamento seguro sob falha parcial
-- [ ] Comportamento seguro sob carga
-
-### Observabilidade
-- [ ] Logs estruturados (em qualquer linguagem)
-- [ ] Métricas técnicas e operacionais
-- [ ] Tracing distribuído quando aplicável
-
-### Operabilidade
-- [ ] Readiness / liveness consistentes
-- [ ] Rollback previsível e testável em menos de 5 minutos
-- [ ] Execução local reprodutível (Docker + Ministack)
-- [ ] Cloud-readiness para AWS
-
-### Segurança
-- [ ] Autenticação e autorização
-- [ ] Sem segredos hardcoded (qualquer linguagem, IaC)
-- [ ] Sem dados sensíveis em logs (qualquer linguagem)
-- [ ] Hardening de bordas
-- [ ] IAM com menor privilégio (quando serverless)
-- [ ] SAST configurado em CI (Semgrep, CodeQL ou equivalente)
-
-### Testes
-- [ ] Testes unitários com padrão da linguagem (JUnit 5 / pytest / testing / Jest)
-- [ ] Testes de integração com dependências reais (Testcontainers / Ministack)
-- [ ] Testes de contrato
-- [ ] Testes de borda web e assíncrona
-- [ ] Testes de comportamento em falha
-- [ ] Handler serverless testável sem AWS SDK (quando aplicável)
-
-### CI/CD e deploy
-- [ ] Pipeline CI separada em jobs (lint → test → build → package)
-- [ ] OIDC para AWS — sem credenciais de longa duração em CI
-- [ ] Lambda versions e aliases — não deploy direto em `$LATEST`
-- [ ] Canary ou blue/green para produção Lambda
-- [ ] Rollback automático via CodeDeploy + CloudWatch Alarm
-- [ ] Terraform state em S3 com DynamoDB lock
-
-### SLOs e incident response
-- [ ] SLOs definidos por componente crítico
-- [ ] SLIs mapeados para métricas AWS reais
-- [ ] CloudWatch Alarms configurados para SLO breach
-- [ ] Runbook para cada alarme crítico
-- [ ] Template de postmortem definido
-
-### Dados e persistência
-- [ ] Trade-offs relacional vs não relacional
-- [ ] CAP theorem quando aplicável
-- [ ] Índices e otimização de queries
-- [ ] Paginação e concorrência
-- [ ] Aderência ao ecossistema AWS
-
-### Infraestrutura como código
-- [ ] Terraform quando aplicável
-- [ ] Módulos, variáveis e outputs organizados
-
-### Contratos de borda
-- [ ] Compatibilidade evolutiva (OpenAPI, Protobuf, GraphQL Schema, Avro, AsyncAPI)
-- [ ] Breaking changes identificados e justificados
-- [ ] Schema governance e versionamento
-- [ ] Testes de contrato
-- [ ] Schema Registry configurado (quando Avro/Protobuf)
-
-### Mensageria (quando aplicável)
-- [ ] Idempotência e deduplicação
-- [ ] Ordering quando aplicável
-- [ ] DLQ e poison message handling
-- [ ] Correlação e tracing
-- [ ] Proteção contra flood/reprocessamento
-
-### Serverless (quando aplicável)
-- [ ] Handler fino — lógica de negócio fora do entrypoint
-- [ ] Idempotência garantida
-- [ ] Cold start avaliado para o SLA
-- [ ] DLQ e destinos assíncronos configurados
-- [ ] Blast radius de falha por função avaliado
+Antes de consolidar, verifique que os agentes cobriram todos os itens do **Checklist Transversal Obrigatório** definido no CLAUDE.md. Não duplique o checklist aqui — consulte a fonte.
 
 ## Regras mandatórias
 
 - Identifique a linguagem do contexto antes de consultar especialistas — não aplique guardrails Java em Python ou Go
-- Respeite o estilo idiomático da linguagem e framework afetados
-- AWS como ambiente alvo, Ministack para local (porta 4566)
-- Diferencie risco crítico de melhoria futura
-- Preserve legibilidade, testabilidade, operabilidade e segurança
-- Não crie complexidade desnecessária
-- Preserve a arquitetura existente — não mova sem justificativa
 - Nomenclatura agnóstica: use `<project-root>/` e `<base-package>/`
-- Não altere código existente sem necessidade
 - Não sobrescreva arquivos sem verificar convenções existentes
 
 ## Formato de saída obrigatório

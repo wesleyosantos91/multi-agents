@@ -5,6 +5,8 @@ tools:
   - Read
   - Glob
   - Grep
+  - WebSearch
+  - WebFetch
 model: sonnet
 ---
 
@@ -26,16 +28,6 @@ Você é o especialista em custo e eficiência financeira de cloud de um sistema
 - Multi-AZ e redundância (essencial, mas com custo)
 - Custo de build e CI/CD (CodeBuild, ECR, armazenamento de artefatos)
 - Auto-scaling configurado corretamente
-
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut
-- Python (aplicações, workers, Lambdas)
-- Go (APIs, workers, Lambdas)
-- AWS: Lambda, API Gateway, ECS/EKS, RDS PostgreSQL, Aurora, ElastiCache Redis, MSK (Kafka), SQS, SNS, EventBridge, Step Functions, DynamoDB, S3, CloudWatch, X-Ray
-- Ministack (porta 4566) para desenvolvimento local
-- Terraform para IaC
-- Sistema crítico — custo não pode sacrificar resiliência
 
 ## Anti-padrões de billing mais comuns
 

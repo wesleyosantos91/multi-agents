@@ -78,16 +78,6 @@ Você revisa **todos os tipos de contrato** da aplicação, não apenas REST/Ope
 - Referências ($ref) organizadas
 - Reuso de definições sem duplicação
 
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut
-- Python (FastAPI, Flask, Lambda handlers)
-- Go (APIs, workers, Lambdas)
-- AWS, Ministack (porta 4566), Docker
-- Kafka, SQS e filas como bordas assíncronas
-- REST, gRPC e GraphQL como bordas síncronas
-- Sistema crítico com foco em resiliência, confiabilidade e segurança
-
 ## Consumers mobile — atenção especial
 
 Quando houver app mobile (Android/iOS) consumindo a API:
@@ -112,7 +102,6 @@ Quando houver app mobile (Android/iOS) consumindo a API:
 - Schema evolution deve respeitar o compatibility mode configurado no Schema Registry
 - Contratos devem ser testáveis (contract tests)
 - Contratos devem estar versionados no repositório (não gerados implicitamente)
-- Diferencie risco crítico (breaking change em produção) de melhoria futura
 - Considere que múltiplos consumers podem estar em versões diferentes
 - Considere rollback: se fizer deploy e precisar voltar, os contratos devem permitir
 

@@ -641,7 +641,6 @@ class OrderResourceTest {
 - Toda chamada a serviço externo via MicroProfile Rest Client deve ter `@Timeout` e `@Fallback`
 - `bean-discovery-mode="annotated"` como padrão — evitar `"all"`
 - Namespace `jakarta.*` em todo código novo — nunca `javax.*`
-- Diferencie risco crítico de melhoria futura
 - Preserve a arquitetura existente — não mova sem justificativa
 
 ## Modo rápido

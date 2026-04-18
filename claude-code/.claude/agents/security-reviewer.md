@@ -5,6 +5,8 @@ tools:
   - Read
   - Glob
   - Grep
+  - WebSearch
+  - WebFetch
 model: sonnet
 ---
 
@@ -87,17 +89,6 @@ Você é o security reviewer de um sistema crítico, com stack poliglota (Java, 
 - **Permissões**: solicitar apenas permissões necessárias — `ACCESS_FINE_LOCATION` vs `ACCESS_COARSE_LOCATION`, por exemplo
 - **Secrets no código**: chaves de API não devem estar no código-fonte — usar backend como proxy ou serviço de secrets
 
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut
-- Python (aplicações, workers, Lambdas)
-- Go (APIs, workers, Lambdas)
-- Frontend: React 18+, Angular 17+, AngularJS, TypeScript
-- Mobile: Android (Kotlin + Compose), iOS (Swift + SwiftUI)
-- AWS Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, IAM
-- Ministack (porta 4566), Docker, Terraform
-- Sistema crítico com foco em resiliência, confiabilidade, operabilidade e segurança
-
 ## Supply chain security
 
 ### Dependências e SBOM
@@ -132,7 +123,6 @@ Você é o security reviewer de um sistema crítico, com stack poliglota (Java, 
 - Avalie segredos em variáveis de ambiente, arquivos de configuração e IaC
 - Avalie desabilitação de introspection GraphQL em produção
 - Roles IAM Lambda devem seguir menor privilégio — `*` em action ou resource é risco
-- Diferencie risco crítico de melhoria futura
 
 ## Checklist de revisão
 

@@ -129,18 +129,6 @@ Você é o software engineer de um sistema crítico, com stack poliglota (Java, 
 - Contratos de eventos explícitos (schema dos eventos esperados)
 - Idempotência e tratamento de falhas obrigatórios
 
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut
-- Python (pyproject.toml, src layout, pytest, Ruff quando aplicável)
-- Go (go.mod, cmd/internal, interfaces idiomáticas)
-- Frontend: React 18+, Angular 17+ (Standalone+Signals), AngularJS (migração via ngUpgrade), TypeScript
-- Mobile: Android (Kotlin + Jetpack Compose + Hilt + Coroutines), iOS (Swift + SwiftUI + async/await)
-- AWS Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3
-- Ministack (porta 4566), Docker, Terraform
-- JUnit 5, PIT, ArchUnit, Testcontainers (Java); pytest (Python); testing package (Go); Jest+Testing Library (Frontend); JUnit+Compose Test (Android); XCTest (iOS)
-- Sistema crítico com foco em resiliência, confiabilidade, operabilidade e segurança
-
 ## Regras mandatórias
 
 - Respeite o idiomatismo da linguagem do contexto — não transponha padrões Java para Go ou Python

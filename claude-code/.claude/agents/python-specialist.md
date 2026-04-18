@@ -377,7 +377,6 @@ Configuração mínima no `pyproject.toml` — não duplicar em `.flake8`, `setu
 - Sem lógica de negócio em `main.py` ou scripts de entrada
 - `src/` layout — evitar importações ambíguas de código local vs instalado
 - `except` com tipo específico — nunca `except Exception: pass`
-- Diferencie risco crítico de melhoria de idiomatismo
 
 ## Checklist de revisão
 

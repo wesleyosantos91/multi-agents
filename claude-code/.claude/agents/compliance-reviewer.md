@@ -28,16 +28,6 @@ Você é o especialista em compliance regulatório de um sistema crítico, com s
 - Privacy by design e privacy by default
 - Transferência internacional de dados
 
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut
-- Python (aplicações, workers, Lambdas)
-- Go (APIs, workers, Lambdas)
-- AWS: Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, CloudWatch
-- Bancos de dados relacionais e não relacionais
-- Mensageria (dados pessoais em eventos/filas)
-- Sistema crítico — impacto regulatório alto
-
 ## Pontos de atenção por camada
 
 ### web/ (bordas síncronas — Java/Python/Go)

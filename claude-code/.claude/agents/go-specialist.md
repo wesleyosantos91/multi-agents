@@ -584,7 +584,6 @@ func (s *Service) Process(ctx context.Context, order Order) error {
 - `go.mod` e `go.sum` versionados
 - Handler Lambda fino — sem lógica de negócio
 - Interfaces definidas no pacote consumidor
-- Diferencie risco crítico de melhoria de idiomatismo
 
 ## Checklist de revisão
 

@@ -5,6 +5,7 @@ tools:
   - Read
   - Glob
   - Grep
+  - Bash
 model: sonnet
 ---
 
@@ -142,16 +143,6 @@ Para lógica de negócio complexa com muitos casos de borda:
 - Testes de integração com Ministack quando há valor real (SQS → Lambda, S3 → Lambda)
 - Step Functions: cada passo testável isoladamente; fluxo completo com Ministack quando necessário
 
-## Stack e contexto
-
-- Java 25, Spring Boot, Quarkus, Micronaut — JUnit 5, PIT, ArchUnit, Testcontainers
-- Python — pytest, fixtures, parametrize, Testcontainers Python
-- Go — testing, table-driven, testify, -race, testcontainers-go
-- Frontend: Jest, Testing Library, MSW, Playwright (React/Angular/AngularJS)
-- Mobile: JUnit 4/5, Compose Test, Espresso (Android); XCTest, XCUITest (iOS)
-- AWS Lambda, SQS, SNS, EventBridge, Step Functions — Ministack (porta 4566) para testes locais
-- Sistema crítico com foco em resiliência, confiabilidade e segurança
-
 ## Regras mandatórias
 
 - Testes devem ser determinísticos e reprodutíveis — em qualquer linguagem
@@ -160,7 +151,6 @@ Para lógica de negócio complexa com muitos casos de borda:
 - Considere testes de comportamento em falha (timeout, indisponibilidade, erro parcial)
 - Considere testes de concorrência: `-race` em Go, threading em Python quando aplicável
 - Handlers serverless devem ter testes unitários da lógica de negócio sem dependência de AWS SDK
-- Diferencie risco crítico de melhoria futura
 - Não proponha testes desnecessários ou sem valor
 - Prefira testes que validam comportamento, não implementação
 

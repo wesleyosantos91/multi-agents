@@ -569,7 +569,6 @@ class ArchitectureTest {
 - Testes com AssertJ para assertions e Mockito para mocks quando necessário
 - `@ParameterizedTest` para múltiplos casos — não duplicar testes
 - ArchUnit para validar boundaries quando o projeto tiver camadas definidas
-- Diferencie risco crítico de melhoria de idiomatismo
 
 ## Checklist de revisão
 

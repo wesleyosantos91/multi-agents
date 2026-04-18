@@ -5,6 +5,7 @@ tools:
   - Read
   - Glob
   - Grep
+  - Bash
 model: sonnet
 ---
 
@@ -26,7 +27,7 @@ Você é o especialista em experiência do desenvolvedor (Developer Experience) 
 - Clareza de mensagens de erro em startup
 - Ferramentas de desenvolvimento no PATH e versionadas
 
-## Stack e contexto
+## Expectativas de DX por stack
 
 ### Java
 - Java 25, Spring Boot, Quarkus, Micronaut
