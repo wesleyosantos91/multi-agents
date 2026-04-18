@@ -129,18 +129,19 @@ class OrderRepositoryIntegrationTest {
 }
 ```
 
-### Testcontainers com LocalStack (AWS)
+### Testcontainers com Floci (AWS)
 ```java
 @Container
-static LocalStackContainer localstack = new LocalStackContainer(
-    DockerImageName.parse("localstack/localstack:latest"))
-    .withServices(SQS, DYNAMODB, S3);
+static GenericContainer<?> floci = new GenericContainer<>(
+    DockerImageName.parse("ghcr.io/floci/floci:latest"))
+    .withExposedPorts(4566)
+    .waitingFor(Wait.forHttp("/_floci/health").forPort(4566));
 
 @DynamicPropertySource
 static void configureAWS(DynamicPropertyRegistry registry) {
-    registry.add("spring.cloud.aws.sqs.endpoint", 
-        () -> localstack.getEndpointOverride(SQS));
-    registry.add("spring.cloud.aws.region.static", localstack::getRegion);
+    var endpoint = "http://%s:%d".formatted(floci.getHost(), floci.getMappedPort(4566));
+    registry.add("spring.cloud.aws.endpoint", () -> endpoint);
+    registry.add("spring.cloud.aws.region.static", () -> "us-east-1");
 }
 ```
 

@@ -135,12 +135,12 @@ Apenas após essa leitura, produza ou atualize a documentação.
 - Status: `docker compose ps`
 - Resetar ambiente: `docker compose down -v && docker compose up -d`
 
-### AWS Serverless local (LocalStack)
-- Subir LocalStack: via `docker compose up -d localstack` ou equivalente
-- Verificar serviços disponíveis: endpoint LocalStack e serviços configurados
+### AWS Serverless local (Floci)
+- Subir Floci: via `docker compose up -d floci` ou equivalente
+- Verificar serviços disponíveis: endpoint Floci (porta 4566) e serviços configurados
 - Executar funções localmente: SAM CLI (`sam local invoke`), Serverless Framework, ou scripts shell
 - Payloads de teste: arquivos em `testdata/events/` ou `tests/events/`
-- Limitações locais vs AWS real: documentar explicitamente o que não funciona em LocalStack
+- Limitações locais vs AWS real: documentar explicitamente o que não funciona em Floci
 
 ## Estrutura de documentação preferida
 
@@ -329,7 +329,7 @@ Antes de concluir qualquer tarefa de documentação, verificar:
 
 ### Infraestrutura local
 - [ ] Docker / Docker Compose documentado?
-- [ ] LocalStack / serviços AWS locais documentados quando presentes?
+- [ ] Floci / serviços AWS locais documentados quando presentes?
 - [ ] Variáveis de ambiente documentadas?
 
 ### Qualidade

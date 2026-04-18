@@ -6,7 +6,7 @@ Uma estrutura de **orquestracao multiagente** para o [Claude Code](https://docs.
 
 Em vez de um unico agente fazendo tudo, voce tem **24 agentes especializados** — cada um com papel, escopo, checklist e formato de saida definidos — coordenados por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
 
-Alem dos agentes, o projeto inclui **33 slash commands customizados**, **44 skills globais reutilizaveis**, **permissoes granulares**, **hooks de seguranca** e uma configuracao completa para workflow profissional.
+Alem dos agentes, o projeto inclui **33 slash commands customizados**, **45 skills globais reutilizaveis**, **permissoes granulares**, **hooks de seguranca** e uma configuracao completa para workflow profissional.
 
 ### Analogia simples
 
@@ -276,7 +276,7 @@ O orquestrador segue esta ordem preferencial:
 
 ## Skills Globais (`~/.claude/skills/`)
 
-Alem dos agentes e slash commands (que sao especificos deste projeto), o repositorio inclui **44 skills globais** instaladas em `~/.claude/skills/`. Skills sao diferentes de commands:
+Alem dos agentes e slash commands (que sao especificos deste projeto), o repositorio inclui **45 skills globais** instaladas em `~/.claude/skills/`. Skills sao diferentes de commands:
 
 | Aspecto | Commands (`.claude/commands/`) | Skills (`~/.claude/skills/`) |
 |---------|-------------------------------|------------------------------|
@@ -327,10 +327,11 @@ Alem dos agentes e slash commands (que sao especificos deste projeto), o reposit
 #### AWS
 | Skill | Conteudo |
 |-------|----------|
-| `aws-architecture-patterns` | API GW+Lambda, SQS+Lambda, EventBridge, Step Functions, DynamoDB |
+| `aws-architecture-patterns` | API GW+Lambda, SQS+Lambda, EventBridge, Step Functions, SAM, CDK, cold start, SnapStart |
 | `aws-iac-patterns` | Terraform multi-env, remote state, modulos, IAM, alarmes |
 | `aws-lambda-checklist` | Handler, IAM, cold start, deploy, DLQ, observabilidade |
 | `aws-observability` | CloudWatch, X-Ray, Log Insights, dashboards, alerting |
+| `aws-local-emulation` | Floci: emulacao local AWS, SDK config, Testcontainers, 31+ servicos |
 
 #### Data Engineering
 | Skill | Conteudo |
@@ -350,7 +351,7 @@ Alem dos agentes e slash commands (que sao especificos deste projeto), o reposit
 | `qa-process` | Piramide de testes, criterios de aceite, edge cases, quality gates |
 | `software-engineering-process` | Design, code review, CI/CD, deploy, SLOs |
 | `testing-strategies` | Estrategia por tipo de codigo, exemplos por linguagem |
-| `performance-testing` | k6, Gatling, JMH, load testing, benchmarks, profiling |
+| `performance-testing` | k6, Gatling, JMeter, JMH, Locust, load/stress/soak testing, profiling |
 
 #### Arquitetura e Documentacao
 | Skill | Conteudo |
@@ -746,7 +747,7 @@ Sim. Use slash commands diretos (`/security-check`, `/check-deps`, etc.) ou acio
 | Cloud | AWS (Lambda, API GW, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
 | Data | Glue, EMR, Kinesis, MSK, Athena, Redshift, Lake Formation |
 | IaC | Terraform |
-| Local | Docker, Ministack (porta 4566) |
+| Local | Docker, Floci (porta 4566) |
 
 ### Posso usar em outro repositorio?
 

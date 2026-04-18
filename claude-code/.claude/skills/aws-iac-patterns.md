@@ -1,6 +1,6 @@
 ---
 name: aws-iac-patterns
-description: "Padrões de IaC AWS com Terraform: módulos, remote state, IAM, networking e ambiente multi-env. Use quando configurar infra AWS, criar módulos Terraform, ou revisar IaC AWS."
+description: "Padrões de IaC AWS com Terraform: módulos, remote state, IAM, networking, secrets management (Secrets Manager, Parameter Store, rotation), ambiente multi-env. Use quando configurar infra AWS, criar módulos Terraform, gerenciar secrets ou revisar IaC AWS."
 ---
 
 # AWS Infrastructure as Code — Terraform Patterns
@@ -254,6 +254,175 @@ resource "aws_dynamodb_table" "orders" {
 }
 ```
 
+## Secrets Management
+
+### Secrets Manager vs Parameter Store
+
+| Criterio | Secrets Manager | Parameter Store |
+|----------|----------------|-----------------|
+| Rotacao automatica | Nativo | Manual (Lambda custom) |
+| Custo | $0.40/secret/mes + API calls | Free (standard), $0.05/param (advanced) |
+| Cross-account | Sim (resource policy) | Nao |
+| Tamanho max | 64 KB | 8 KB (advanced) |
+| Melhor para | Credenciais BD, API keys, certificados | Config, feature flags, endpoints |
+
+### Secrets Manager — Terraform
+```hcl
+resource "aws_secretsmanager_secret" "db_credentials" {
+  name                    = "${var.service}/${var.environment}/db-credentials"
+  description             = "Database credentials for ${var.service}"
+  recovery_window_in_days = var.environment == "prod" ? 30 : 7
+  tags                    = local.common_tags
+}
+
+resource "aws_secretsmanager_secret_version" "db_credentials" {
+  secret_id = aws_secretsmanager_secret.db_credentials.id
+  secret_string = jsonencode({
+    username = var.db_username
+    password = var.db_password
+    host     = aws_db_instance.main.address
+    port     = aws_db_instance.main.port
+    dbname   = var.db_name
+  })
+}
+```
+
+### Rotacao automatica
+```hcl
+resource "aws_secretsmanager_secret_rotation" "db_credentials" {
+  secret_id           = aws_secretsmanager_secret.db_credentials.id
+  rotation_lambda_arn = aws_lambda_function.secret_rotation.arn
+  rotation_rules {
+    automatically_after_days = 30
+  }
+}
+
+# Lambda de rotacao
+resource "aws_lambda_function" "secret_rotation" {
+  function_name = "${var.service}-secret-rotation-${var.environment}"
+  runtime       = "python3.13"
+  handler       = "rotation.handler"
+  timeout       = 30
+  role          = aws_iam_role.rotation_lambda.arn
+
+  environment {
+    variables = {
+      SECRET_ARN = aws_secretsmanager_secret.db_credentials.arn
+    }
+  }
+}
+
+# Permissao para Secrets Manager invocar a Lambda
+resource "aws_lambda_permission" "secretsmanager" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.secret_rotation.function_name
+  principal     = "secretsmanager.amazonaws.com"
+  source_arn    = aws_secretsmanager_secret.db_credentials.arn
+}
+```
+
+### Parameter Store — Terraform
+```hcl
+# Parametro simples (free tier)
+resource "aws_ssm_parameter" "api_endpoint" {
+  name        = "/${var.service}/${var.environment}/api-endpoint"
+  type        = "String"
+  value       = var.api_endpoint
+  description = "External API endpoint for ${var.service}"
+  tags        = local.common_tags
+}
+
+# Parametro sensivel (encrypted)
+resource "aws_ssm_parameter" "api_key" {
+  name        = "/${var.service}/${var.environment}/api-key"
+  type        = "SecureString"
+  value       = var.api_key
+  key_id      = aws_kms_key.main.arn
+  description = "External API key"
+  tags        = local.common_tags
+}
+```
+
+### IAM para Lambda acessar secrets
+```hcl
+resource "aws_iam_policy" "read_secrets" {
+  name = "${local.full_name}-read-secrets"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["secretsmanager:GetSecretValue"]
+        Resource = [aws_secretsmanager_secret.db_credentials.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = ["ssm:GetParameter", "ssm:GetParametersByPath"]
+        Resource = ["arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.service}/${var.environment}/*"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = [aws_kms_key.main.arn]
+      },
+    ]
+  })
+}
+```
+
+### Leitura em runtime
+
+```java
+// Java — AWS SDK + cache
+@Configuration
+public class SecretsConfig {
+    @Bean
+    @Profile("!test")
+    public DatabaseCredentials databaseCredentials(SecretsManagerClient client) {
+        var response = client.getSecretValue(b -> b.secretId("order-service/prod/db-credentials"));
+        return objectMapper.readValue(response.secretString(), DatabaseCredentials.class);
+    }
+}
+```
+
+```python
+# Python — boto3 + cache
+import boto3, json
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def get_db_credentials() -> dict:
+    client = boto3.client("secretsmanager")
+    response = client.get_secret_value(SecretId=f"{SERVICE}/{ENV}/db-credentials")
+    return json.loads(response["SecretString"])
+```
+
+```go
+// Go — AWS SDK v2
+func GetSecret(ctx context.Context, client *secretsmanager.Client, secretID string) (map[string]string, error) {
+    output, err := client.GetSecretValue(ctx, &secretsmanager.GetSecretValueInput{
+        SecretId: &secretID,
+    })
+    if err != nil {
+        return nil, fmt.Errorf("getting secret %s: %w", secretID, err)
+    }
+    var result map[string]string
+    if err := json.Unmarshal([]byte(*output.SecretString), &result); err != nil {
+        return nil, fmt.Errorf("parsing secret: %w", err)
+    }
+    return result, nil
+}
+```
+
+### Regras de secrets
+- **Nunca** hardcoded em codigo, env vars de CI, ou terraform.tfvars commitados
+- Secrets Manager para credenciais que rotacionam
+- Parameter Store SecureString para config sensivel estatica
+- KMS customer-managed key para encryption
+- IAM com menor privilegio (secret ARN especifico)
+- Cache em runtime (evitar chamadas repetidas)
+- Rotacao automatica para credenciais de banco
+
 ## Checklist
 - [ ] Remote state em S3 com encryption e DynamoDB lock?
 - [ ] Módulos reutilizáveis para Lambda, SQS, DynamoDB?
@@ -265,3 +434,7 @@ resource "aws_dynamodb_table" "orders" {
 - [ ] `terraform fmt` e `terraform validate` em CI?
 - [ ] `terraform plan` comentado em PRs?
 - [ ] Variables com description e validation?
+- [ ] Secrets em Secrets Manager (nao env vars ou tfvars)?
+- [ ] Rotacao automatica para credenciais de banco?
+- [ ] Parameter Store para config sensivel estatica?
+- [ ] IAM restrito a secrets especificos (nao `*`)?

@@ -196,7 +196,7 @@ docs/architecture/adr/
 ├── 0001-dynamodb-for-orders.md
 ├── 0002-sqs-lambda-async-processing.md
 ├── 0003-report-batch-item-failures.md
-├── 0004-ministack-local-emulator.md
+├── 0004-floci-local-emulator.md
 └── README.md  # indice com status de cada ADR
 ```
 
@@ -210,7 +210,7 @@ docs/architecture/adr/
 | 0001 | DynamoDB para pedidos | Accepted | 2026-03-15 |
 | 0002 | SQS+Lambda async | Accepted | 2026-03-15 |
 | 0003 | ReportBatchItemFailures | Accepted | 2026-03-20 |
-| 0004 | Ministack como emulador | Accepted | 2026-04-01 |
+| 0004 | Floci como emulador | Accepted | 2026-04-01 |
 ```
 
 ## Boas praticas

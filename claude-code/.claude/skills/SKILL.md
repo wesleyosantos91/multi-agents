@@ -30,10 +30,11 @@ Skills globais disponíveis em todos os projetos. Carregam on-demand quando rele
 - [ios-patterns](ios-patterns.md) — Swift, SwiftUI, @Observable, async/await, SwiftData, Navigation
 
 ## AWS
-- [aws-architecture-patterns](aws-architecture-patterns.md) — API GW+Lambda, SQS+Lambda, EventBridge, Step Functions, DynamoDB
-- [aws-iac-patterns](aws-iac-patterns.md) — Terraform multi-env, remote state, modulos, IAM, alarmes
+- [aws-architecture-patterns](aws-architecture-patterns.md) — API GW+Lambda, SQS+Lambda, EventBridge, Step Functions, ECS/Fargate, ElastiCache, CloudFront, SAM, CDK
+- [aws-iac-patterns](aws-iac-patterns.md) — Terraform multi-env, remote state, modulos, IAM, alarmes, secrets management
 - [aws-lambda-checklist](aws-lambda-checklist.md) — Handler, IAM, cold start, deploy, DLQ, observabilidade
 - [aws-observability](aws-observability.md) — CloudWatch, X-Ray, Log Insights, dashboards, alerting
+- [aws-local-emulation](aws-local-emulation.md) — Floci: emulacao local AWS, SDK config, Testcontainers, 31+ servicos
 
 ## Data Engineering
 - [spark-data-engineering](spark-data-engineering.md) — PySpark, batch, streaming, Glue, EMR, data quality
@@ -48,7 +49,7 @@ Skills globais disponíveis em todos os projetos. Carregam on-demand quando rele
 - [qa-process](qa-process.md) — Piramide de testes, criterios de aceite, edge cases, quality gates
 - [software-engineering-process](software-engineering-process.md) — Design, code review, CI/CD, deploy, SLOs
 - [testing-strategies](testing-strategies.md) — Estrategia por tipo de codigo, exemplos por linguagem
-- [performance-testing](performance-testing.md) — k6, Gatling, JMH, load testing, benchmarks, profiling
+- [performance-testing](performance-testing.md) — k6, Gatling, JMeter, JMH, Locust, load/stress/soak testing, profiling
 
 ## Arquitetura e Documentacao
 - [c4-model](c4-model.md) — Context, Container, Component, Code + Structurizr, Mermaid
@@ -59,8 +60,8 @@ Skills globais disponíveis em todos os projetos. Carregam on-demand quando rele
 - [code-review](code-review.md) — Revisao estruturada: correcao, seguranca, qualidade, testes
 - [commit-message](commit-message.md) — Conventional Commits com exemplos
 - [pr-description](pr-description.md) — Template de PR: summary, changes, test plan
-- [security-audit](security-audit.md) — Auditoria: segredos, injection, auth, dados, deps
-- [error-handling](error-handling.md) — Tratamento de erros por linguagem, RFC 9457
+- [security-audit](security-audit.md) — Auditoria, auth patterns (OAuth2, JWT, RBAC/ABAC), segredos, injection
+- [error-handling](error-handling.md) — Tratamento de erros, resilience patterns (retry, circuit breaker, bulkhead), RFC 9457
 - [dockerfile-best-practices](dockerfile-best-practices.md) — Multi-stage, seguranca, cache, templates por linguagem
 - [git-workflow](git-workflow.md) — Merge conflicts, rebase, cherry-pick, bisect, recovery
 - [terraform-module](terraform-module.md) — Estrutura, variables, outputs, naming, state, seguranca

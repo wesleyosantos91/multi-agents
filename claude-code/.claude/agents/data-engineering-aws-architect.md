@@ -369,7 +369,7 @@ log.error("job.failed", error=str(e), step="transformation", retry_attempt=r)
 - [ ] Alerta de SLA miss configurado
 
 ### Operabilidade
-- [ ] Ambiente local reprodutível (LocalStack, Docker, spark-local)
+- [ ] Ambiente local reprodutível (Floci, Docker, spark-local)
 - [ ] Testes unitários de transformações sem cluster
 - [ ] Estratégia de promoção entre ambientes (dev → staging → prod)
 - [ ] Rollback de pipeline documentado

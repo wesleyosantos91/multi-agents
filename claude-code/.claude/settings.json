@@ -51,7 +51,7 @@
       "WebFetch(domain:registry.terraform.io)",
       "WebFetch(domain:hub.docker.com)",
       "WebFetch(domain:docs.aws.amazon.com)",
-      "WebFetch(domain:ministack.org)",
+      "WebFetch(domain:floci.io)",
       "WebFetch(domain:spring.io)",
       "WebFetch(domain:quarkus.io)",
       "WebFetch(domain:micronaut.io)",

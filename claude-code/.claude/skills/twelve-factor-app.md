@@ -177,7 +177,7 @@ srv.Shutdown(ctx)
 |-----|----------|---------|
 | **Tempo** | Deploy semanal | Deploy continuo (diario ou mais) |
 | **Pessoal** | Dev escreve, Ops deploya | DevOps — quem escreve, deploya |
-| **Ferramentas** | SQLite local, Postgres prod | Mesmo stack local (Docker, Ministack) |
+| **Ferramentas** | SQLite local, Postgres prod | Mesmo stack local (Docker, Floci) |
 
 ```yaml
 # docker-compose.yml — mesmo stack local e producao
@@ -186,8 +186,8 @@ services:
     image: postgres:16
   redis:
     image: redis:7
-  ministack:
-    image: ministack/ministack:latest
+  floci:
+    image: ghcr.io/floci/floci:latest
     ports: ["4566:4566"]
 ```
 

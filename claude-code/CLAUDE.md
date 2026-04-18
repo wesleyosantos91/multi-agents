@@ -23,7 +23,7 @@ O orquestrador consulta os especialistas, consolida achados, resolve conflitos e
 | Frontend | React (Vite + TypeScript) · Angular (versão atual, Standalone + Signals) · AngularJS (legado/migração) |
 | Mobile | Android (Kotlin + Jetpack Compose) · iOS (Swift + SwiftUI) |
 | Cloud | AWS (Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
-| Emulação local | Ministack (drop-in LocalStack replacement, porta 4566) |
+| Emulação local | Floci (emulador AWS local, porta 4566) |
 | Containerização | Docker |
 | IaC | Terraform |
 | Ambiente dev | Dev Container (opcional recomendado) |
@@ -237,7 +237,7 @@ Toda proposta, revisão ou implementação deve validar:
 ### Operabilidade
 - [ ] Readiness / liveness consistentes
 - [ ] Rollback previsível
-- [ ] Execução local reprodutível (Docker + LocalStack)
+- [ ] Execução local reprodutível (Docker + Floci)
 - [ ] Cloud-readiness para AWS
 
 ### Segurança
@@ -298,7 +298,7 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Onboarding documentado (máximo 3-5 comandos para rodar localmente)
 - [ ] docker-compose sobe todos os serviços necessários
 - [ ] application-local.yml completo e funcional
-- [ ] Ministack cobre os serviços AWS usados localmente
+- [ ] Floci cobre os serviços AWS usados localmente
 
 ### CI/CD e deploy
 - [ ] Pipeline CI: lint → test → build → package (jobs separados)
@@ -396,19 +396,17 @@ O `staff-engineer-orchestrator` deve consultar os agentes nesta ordem preferenci
 ### AWS
 - Operação em cloud, serviços gerenciados, segurança operacional
 
-### LocalStack
-- Testes e desenvolvimento local, reprodutibilidade
+### Floci
+- Emulador AWS local — porta 4566, 31+ serviços
+- Healthcheck em `/_floci/health`
+- 4 modos de storage: memory, persistent, hybrid, wal
+- Consultar https://floci.io/floci/ para serviços e atualizações
 
 ### Docker
 - Ambiente local reprodutível, paridade com cloud
 
 ### Terraform
 - Módulos organizados, separação por ambiente, naming consistente
-
-### Ministack
-- Drop-in replacement de LocalStack — mesma interface, porta 4566
-- Healthcheck em `/_ministack/health`
-- Não suporta init-scripts via `ready.d` — inicialização via Makefile/scripts externos
 
 ---
 
@@ -437,7 +435,7 @@ poc-aws-lambda/
 │   └── workflows/                 # GitHub Actions
 ├── .claude/
 │   └── agents/                    # Agentes especializados
-├── docker-compose.yml             # Ministack + dependências locais
+├── docker-compose.yml             # Floci + dependências locais
 ├── Makefile                       # Targets: build, test, deploy, local
 └── CLAUDE.md
 ```
@@ -452,4 +450,4 @@ Exemplos de ADRs que devem existir neste projeto:
 - ADR-0001: Escolha de DynamoDB para persistência de pedidos
 - ADR-0002: Uso de SQS + Lambda para processamento assíncrono
 - ADR-0003: ReportBatchItemFailures + DLQ como estratégia de error handling
-- ADR-0004: Ministack como emulador local de AWS
+- ADR-0004: Floci como emulador local de AWS

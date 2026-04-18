@@ -13,7 +13,7 @@ Acione o `sre-platform-engineer` para análise de operabilidade e plataforma.
 - Docker e ambiente local
 - Lambda versions/aliases, deploy strategy
 - CloudWatch Alarms configurados
-- Ministack cobrindo serviços AWS
+- Floci cobrindo serviços AWS
 
 ## Entrada do usuário
 $ARGUMENTS

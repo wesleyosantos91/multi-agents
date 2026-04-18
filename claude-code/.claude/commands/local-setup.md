@@ -2,7 +2,7 @@ Acione o `devex-reviewer` para validar o ambiente de desenvolvimento local.
 
 ## O que verificar
 - docker-compose.yml sobe todos os serviços necessários
-- Ministack (porta 4566) está configurado e acessível
+- Floci (porta 4566) está configurado e acessível
 - application-local.yml ou equivalente está completo e funcional
 - Makefile tem targets claros (build, test, deploy, local)
 - Onboarding é possível em 3-5 comandos máximo

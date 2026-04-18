@@ -491,7 +491,7 @@ func TestHandler(t *testing.T) {
 
 - Handler testável com service mockado via interface
 - Payloads de evento em `testdata/events/` — JSON real de SQS, EventBridge, API GW
-- Não testar AWS SDK diretamente na unit — testar via integração com LocalStack quando necessário
+- Não testar AWS SDK diretamente na unit — testar via integração com Floci quando necessário
 
 ## Logging estruturado com slog
 
