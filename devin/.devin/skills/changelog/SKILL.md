@@ -1,0 +1,49 @@
+---
+name: changelog
+description: "Gere um changelog das mudanças da branch atual comparada com main."
+argument-hint: "[contexto adicional]"
+---
+
+Gere um changelog das mudanças da branch atual comparada com main.
+
+## Processo
+
+### 1. Coleta
+- `git log main...HEAD --oneline` para listar todos os commits
+- `git diff main...HEAD --stat` para listar arquivos alterados
+- Leia os diffs relevantes para entender a natureza das mudanças
+
+### 2. Classificação
+Classifique cada mudança:
+- **feat**: nova funcionalidade
+- **fix**: correção de bug
+- **refactor**: mudança interna sem impacto funcional
+- **docs**: documentação
+- **test**: testes
+- **infra**: CI/CD, IaC, Docker, configuração
+- **deps**: atualização de dependências
+- **breaking**: mudança que quebra compatibilidade
+
+### 3. Output
+
+```markdown
+## Changelog
+
+### Features
+- feat: descrição da feature
+
+### Fixes
+- fix: descrição do fix
+
+### Breaking Changes
+- breaking: o que mudou e o impacto
+
+### Other
+- refactor/docs/test/infra/deps: descrição
+```
+
+## Agente
+Se o changelog for para PR ou release, considere acionar `tech-writer` para revisar a documentação.
+
+## Contexto adicional
+$ARGUMENTS

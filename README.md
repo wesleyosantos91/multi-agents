@@ -37,14 +37,21 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 │       ├── skills/              # 45 skills
 │       ├── knowledge/           # playbooks detalhados por papel + docs-reference
 │       └── hooks/               # quality-gates + scripts PowerShell
-└── gemini/               # Google Gemini CLI — GEMINI.md + .gemini/{agents,commands,skills}
-    ├── GEMINI.md
+├── gemini/               # Google Gemini CLI — GEMINI.md + .gemini/{agents,commands,skills}
+│   ├── GEMINI.md
+│   ├── README.md
+│   └── .gemini/
+│       ├── settings.json
+│       ├── agents/              # 24 agentes (Markdown)
+│       ├── commands/            # 58 comandos TOML (orchestrate, reviews, roles, workflows)
+│       └── skills/              # 46 skills
+└── devin/                # Devin CLI — AGENTS.md + .devin/{agents,skills} + config.json
+    ├── AGENTS.md
     ├── README.md
-    └── .gemini/
-        ├── settings.json
-        ├── agents/              # 24 agentes (Markdown)
-        ├── commands/            # 58 comandos TOML (orchestrate, reviews, roles, workflows)
-        └── skills/              # 46 skills
+    └── .devin/
+        ├── config.json          # permissoes, hooks, read_config_from
+        ├── agents/              # 24 subagentes (pasta/AGENT.md + frontmatter YAML)
+        └── skills/              # 79 skills (slash commands + conhecimento procedural)
 ```
 
 ## Papeis (consistentes entre plataformas)
@@ -78,16 +85,18 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 
 ## Comparativo entre plataformas
 
-| Aspecto | Claude Code | Codex | Copilot | Gemini |
-|---------|------------|-------|---------|--------|
-| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` | `AGENTS.md` + `.github/copilot-instructions.md` | `GEMINI.md` |
-| Formato dos agentes | Markdown + frontmatter YAML | TOML (`.codex/agents/*.toml`) | `.agent.md` (frontmatter YAML) | Markdown puro |
-| Comandos/workflows | `.claude/commands/*.md` (33) | `.codex/skills/*/SKILL.md` (34) | `.github/prompts/*.prompt.md` (34) | `.gemini/commands/**/*.toml` (58) |
-| Skills reutilizaveis | `.claude/skills/` (46) | Skills fazem papel duplo (workflow + conhecimento) | `.github/skills/` (45) | `.gemini/skills/` (46) |
-| Sub-agentes | `Agent(...)` nativo | Delegacao em `.codex/config.toml` | Instrucao via prompt | Comandos `/role` |
-| Modelo por agente | Frontmatter YAML (`opus`/`sonnet`/`haiku`) | `.codex/agents/*.toml` | Nao configuravel | Nao configuravel |
-| Hooks | `.claude/settings.json` (bash) | `.codex/hooks/*.py` (exp. Linux/macOS) | `.github/hooks/*.ps1` | `.gemini/settings.json` (powershell) |
-| Orquestracao | Automatica | Semi-automatica | Manual via prompt | Manual via `/comando` |
+| Aspecto | Claude Code | Codex | Copilot | Gemini | Devin |
+|---------|------------|-------|---------|--------|-------|
+| Instrucoes globais | `CLAUDE.md` | `AGENTS.md` | `AGENTS.md` + `.github/copilot-instructions.md` | `GEMINI.md` | `AGENTS.md` |
+| Formato dos agentes | Markdown + frontmatter YAML | TOML (`.codex/agents/*.toml`) | `.agent.md` (frontmatter YAML) | Markdown puro | `AGENT.md` (frontmatter YAML) |
+| Comandos/workflows | `.claude/commands/*.md` (33) | `.codex/skills/*/SKILL.md` (34) | `.github/prompts/*.prompt.md` (34) | `.gemini/commands/**/*.toml` (58) | `.devin/skills/*/SKILL.md` (79)* |
+| Skills reutilizaveis | `.claude/skills/` (46) | Skills fazem papel duplo | `.github/skills/` (45) | `.gemini/skills/` (46) | Merged com commands (no campo `skills/`) |
+| Sub-agentes | `Agent(...)` nativo | Delegacao em `.codex/config.toml` | Instrucao via prompt | Comandos `/role` | `subagent: true` ou `agent: <nome>` em skills |
+| Modelo por agente | Frontmatter YAML (`opus`/`sonnet`/`haiku`) | `.codex/agents/*.toml` | Nao configuravel | Nao configuravel | Frontmatter YAML (`model:`) |
+| Hooks | `.claude/settings.json` (bash) | `.codex/hooks/*.py` (exp. Linux/macOS) | `.github/hooks/*.ps1` | `.gemini/settings.json` (powershell) | `.devin/config.json` (7 eventos, bash) |
+| Orquestracao | Automatica | Semi-automatica | Manual via prompt | Manual via `/comando` | Via subagents (foreground/background) |
+
+\* Devin combina slash commands e skills reutilizaveis em um unico catalogo `skills/`, invocados por `/<nome>`.
 
 ## Mecanismo de invocacao por plataforma
 
@@ -97,6 +106,7 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 | **Codex** | Semi-automatica — o prompt referencia o `SKILL.md` e solicita consulta sequencial |
 | **Copilot** | Manual — seletor de agentes no painel Copilot Chat (VS Code, modo Agent) ou por instrucao no prompt |
 | **Gemini** | Manual — comandos `/role` no terminal (ex.: `/security-reviewer`, `/architect-reviewer`) |
+| **Devin** | Subagentes isolados — invocados pelo agente principal via `subagent: true` / `agent: <nome>` ou `/skill` |
 
 ---
 
@@ -104,22 +114,22 @@ Cada pasta contem a estrutura completa e pronta para uso da plataforma correspon
 
 Cada plataforma tem seu formato, mas a ideia e a mesma: criar o arquivo, registrar na governanca (CLAUDE.md/AGENTS.md/GEMINI.md) e, quando aplicavel, atualizar a ordem de consulta do orquestrador. O detalhe especifico de cada plataforma esta no README de cada pasta.
 
-| Adicao | Claude Code | Codex | Copilot | Gemini |
-|--------|-------------|-------|---------|--------|
-| Novo agente | `.claude/agents/<nome>.md` com frontmatter YAML | `.codex/agents/<nome>.toml` | `.github/agents/<nome>.agent.md` + playbook em `.github/knowledge/agents/<nome>.md` | `.gemini/agents/<nome>.md` + `.gemini/commands/roles/<nome>.toml` |
-| Novo comando/workflow | `.claude/commands/<nome>.md` | `.codex/skills/<nome>/SKILL.md` + registro em `.codex/config.toml` (`[[skills.config]]`) | `.github/prompts/<nome>.prompt.md` | `.gemini/commands/<categoria>/<nome>.toml` |
-| Nova skill/conhecimento | `.claude/skills/<nome>/SKILL.md` | `.codex/skills/<nome>/SKILL.md` (mesmo arquivo do workflow) | `.github/skills/<nome>/SKILL.md` | `.gemini/skills/<nome>/SKILL.md` |
-| Nova instrucao contextual | Ajuste no `CLAUDE.md` | Ajuste no `AGENTS.md` | `.github/instructions/<nome>.instructions.md` com `applyTo` | Ajuste no `GEMINI.md` |
-| Hook adicional | Editar `.claude/settings.json` (`PreToolUse`/`PostToolUse`) | Editar `.codex/hooks.json` + script em `.codex/hooks/` | Editar `.github/hooks/quality-gates.json` + script em `.github/hooks/scripts/` | Editar `.gemini/settings.json` (`BeforeTool`/`AfterTool`) |
-| Permissao/ferramenta | `.claude/settings.json` (`permissions.allow` / `permissions.deny`) | `.codex/config.toml` (`sandbox_mode`, `sandbox_workspace_write`) | `.github/copilot/settings.json` | `.gemini/settings.json` (`tools.allowed`) |
-| Registrar no orquestrador | `staff-engineer-orchestrator.md` (ordem de consulta) + `CLAUDE.md` | `.codex/agents/staff-engineer-orchestrator.toml` + `AGENTS.md` | `.github/knowledge/agents/staff-engineer-orchestrator.md` + `AGENTS.md` | `.gemini/agents/staff-engineer-orchestrator.md` + `GEMINI.md` |
+| Adicao | Claude Code | Codex | Copilot | Gemini | Devin |
+|--------|-------------|-------|---------|--------|-------|
+| Novo agente | `.claude/agents/<nome>.md` com frontmatter YAML | `.codex/agents/<nome>.toml` | `.github/agents/<nome>.agent.md` + playbook em `.github/knowledge/agents/<nome>.md` | `.gemini/agents/<nome>.md` + `.gemini/commands/roles/<nome>.toml` | `.devin/agents/<nome>/AGENT.md` com frontmatter YAML |
+| Novo comando/workflow | `.claude/commands/<nome>.md` | `.codex/skills/<nome>/SKILL.md` + registro em `.codex/config.toml` (`[[skills.config]]`) | `.github/prompts/<nome>.prompt.md` | `.gemini/commands/<categoria>/<nome>.toml` | `.devin/skills/<nome>/SKILL.md` (invocado via `/<nome>`) |
+| Nova skill/conhecimento | `.claude/skills/<nome>/SKILL.md` | `.codex/skills/<nome>/SKILL.md` (mesmo arquivo do workflow) | `.github/skills/<nome>/SKILL.md` | `.gemini/skills/<nome>/SKILL.md` | `.devin/skills/<nome>/SKILL.md` (mesmo arquivo do command) |
+| Nova instrucao contextual | Ajuste no `CLAUDE.md` | Ajuste no `AGENTS.md` | `.github/instructions/<nome>.instructions.md` com `applyTo` | Ajuste no `GEMINI.md` | Ajuste no `AGENTS.md` (ou `AGENTS.md` aninhado em subdiretorio) |
+| Hook adicional | Editar `.claude/settings.json` (`PreToolUse`/`PostToolUse`) | Editar `.codex/hooks.json` + script em `.codex/hooks/` | Editar `.github/hooks/quality-gates.json` + script em `.github/hooks/scripts/` | Editar `.gemini/settings.json` (`BeforeTool`/`AfterTool`) | Editar `.devin/config.json` (7 eventos: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PermissionRequest, Stop, SessionEnd) |
+| Permissao/ferramenta | `.claude/settings.json` (`permissions.allow` / `permissions.deny`) | `.codex/config.toml` (`sandbox_mode`, `sandbox_workspace_write`) | `.github/copilot/settings.json` | `.gemini/settings.json` (`tools.allowed`) | `.devin/config.json` (`permissions.allow` / `ask` / `deny` com `Read/Write/Edit/Exec/Fetch(<pattern>)`) |
+| Registrar no orquestrador | `staff-engineer-orchestrator.md` (ordem de consulta) + `CLAUDE.md` | `.codex/agents/staff-engineer-orchestrator.toml` + `AGENTS.md` | `.github/knowledge/agents/staff-engineer-orchestrator.md` + `AGENTS.md` | `.gemini/agents/staff-engineer-orchestrator.md` + `GEMINI.md` | `.devin/agents/staff-engineer-orchestrator/AGENT.md` + `AGENTS.md` |
 
 ### Checklist antes de mergear uma nova config
 
 1. O novo agente/comando/skill aparece na governanca (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`)?
 2. A ordem de consulta do `staff-engineer-orchestrator` foi atualizada quando o papel precisa participar de revisoes?
 3. O README da plataforma foi atualizado (nomes, contagens, proposito)?
-4. Se for agente poliglota, as outras plataformas receberam o mesmo papel? (paridade entre as 4 pastas)
+4. Se for agente poliglota, as outras plataformas receberam o mesmo papel? (paridade entre as 5 pastas)
 5. Se adiciona hook ou permissao, ha teste/validacao manual documentada?
 
 Consulte o README de cada pasta para o passo a passo completo da plataforma correspondente.

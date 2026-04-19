@@ -1,0 +1,125 @@
+{
+  "$schema": "https://cli.devin.ai/schemas/config.json",
+
+  "agent": {
+    "model": "claude-sonnet-4-6"
+  },
+
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Grep(**)",
+      "Glob(**)",
+      "Exec(git)",
+      "Exec(make)",
+      "Exec(docker)",
+      "Exec(docker-compose)",
+      "Exec(terraform)",
+      "Exec(mvn)",
+      "Exec(./mvnw)",
+      "Exec(gradle)",
+      "Exec(./gradlew)",
+      "Exec(go)",
+      "Exec(python)",
+      "Exec(pip)",
+      "Exec(uv)",
+      "Exec(ruff)",
+      "Exec(npm)",
+      "Exec(npx)",
+      "Exec(node)",
+      "Exec(java)",
+      "Exec(javac)",
+      "Exec(ls)",
+      "Exec(cat)",
+      "Exec(mkdir)",
+      "Exec(cp)",
+      "Exec(mv)",
+      "Exec(find)",
+      "Exec(wc)",
+      "Exec(head)",
+      "Exec(tail)",
+      "Exec(sort)",
+      "Exec(uniq)",
+      "Exec(curl)",
+      "Exec(aws)",
+      "Exec(gh)",
+      "Exec(jq)",
+      "Exec(which)",
+      "Exec(echo)",
+      "Exec(pwd)",
+      "Exec(env)",
+      "Fetch(domain:github.com)",
+      "Fetch(domain:raw.githubusercontent.com)",
+      "Fetch(domain:search.maven.org)",
+      "Fetch(domain:central.sonatype.com)",
+      "Fetch(domain:mvnrepository.com)",
+      "Fetch(domain:pypi.org)",
+      "Fetch(domain:pkg.go.dev)",
+      "Fetch(domain:registry.npmjs.org)",
+      "Fetch(domain:registry.terraform.io)",
+      "Fetch(domain:hub.docker.com)",
+      "Fetch(domain:docs.aws.amazon.com)",
+      "Fetch(domain:floci.io)",
+      "Fetch(domain:spring.io)",
+      "Fetch(domain:quarkus.io)",
+      "Fetch(domain:micronaut.io)",
+      "Fetch(domain:jakarta.ee)",
+      "Fetch(domain:microprofile.io)"
+    ],
+    "ask": [
+      "Write(**)",
+      "Edit(**)"
+    ],
+    "deny": [
+      "Exec(rm -rf /)",
+      "Exec(rm -rf /*)",
+      "Exec(rm -rf .)",
+      "Exec(git push --force)",
+      "Exec(git push -f)",
+      "Exec(git reset --hard)",
+      "Write(.env)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Write(**/*.secret)",
+      "Write(**/*.credentials)",
+      "Write(**/*.token)",
+      "Edit(.env)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.key)",
+      "Edit(**/*.secret)",
+      "Edit(**/*.credentials)",
+      "Edit(**/*.token)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "write|edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'payload=$(cat); file=$(echo \"$payload\" | jq -r \".tool_input.file_path // .tool_input.path // empty\"); if [ -n \"$file\" ] && echo \"$file\" | grep -qiE \"\\.(env|pem|key|secret|credentials|token)$\"; then echo \"{\\\"decision\\\": \\\"block\\\", \\\"reason\\\": \\\"arquivo sensível bloqueado: $file\\\"}\"; exit 2; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "exec",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'payload=$(cat); output=$(echo \"$payload\" | jq -r \".tool_response.output // empty\"); if echo \"$output\" | grep -qiE \"(AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|PRIVATE.KEY|password\\s*=\\s*[^$])\"; then echo \"{\\\"warn\\\": \\\"possível segredo detectado no output\\\"}\"; fi'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+
+  "read_config_from": {
+    "claude": false
+  }
+}
