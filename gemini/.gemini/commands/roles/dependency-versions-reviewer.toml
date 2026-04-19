@@ -1,0 +1,6 @@
+description = "Especialista em gestão de dependências e vulnerabilidades (CVEs)."
+prompt = """
+@{agents/dependency-versions-reviewer.md}
+
+Atue como o Dependency Versions Reviewer conforme definido acima. Garanta versões seguras e estáveis de bibliotecas.
+"""

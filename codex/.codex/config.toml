@@ -1,0 +1,184 @@
+# Configuração do projeto Codex (baseline enterprise)
+
+model = "gpt-5.4"
+model_provider = "openai"
+model_reasoning_effort = "high"
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+allow_login_shell = true
+
+project_doc_max_bytes = 32768
+project_doc_fallback_filenames = []
+project_root_markers = [".git", "AGENTS.md", ".codex/config.toml"]
+
+web_search = "cached"
+file_opener = "vscode"
+
+[features]
+# Hooks são experimentais e permanecem desabilitados no runtime Windows.
+codex_hooks = true
+unified_exec = true
+enable_request_compression = true
+shell_tool = true
+skill_mcp_dependency_install = true
+undo = false
+apps = false
+
+[agents]
+max_threads = 6
+max_depth = 1
+job_max_runtime_seconds = 2400
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = ["."]
+
+[shell_environment_policy]
+inherit = "all"
+ignore_default_excludes = false
+exclude = []
+set = {}
+include_only = []
+experimental_use_profile = false
+
+# Registro explícito das skills canônicas do projeto
+
+[[skills.config]]
+path = "./.codex/skills/adr/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/arch-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/changelog/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/check-deps/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/cicd-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/compliance/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/contract-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/data-platform/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/data-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/debug/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/docs/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/explain/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/finops/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/floci/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/full-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/health-check/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/hotfix/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/implement/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/incident-readiness/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/local-setup/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/migrate/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/optimize/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/perf-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/pre-pr/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/qa-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/quick-fix/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/refactor/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/runbook/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/scaffold/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/security-check/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/sre-review/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/tech-debt/SKILL.md"
+enabled = true
+
+[[skills.config]]
+path = "./.codex/skills/test-gen/SKILL.md"
+enabled = true
+
+# TODO: habilitar MCP servers quando houver aprovação de segurança/compliance.
+

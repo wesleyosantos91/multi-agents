@@ -1,0 +1,43 @@
+{
+  "tools": {
+    "allowed": [
+      "run_shell_command",
+      "google_web_search",
+      "web_fetch",
+      "read_file",
+      "write_file",
+      "replace",
+      "glob",
+      "grep_search",
+      "list_directory",
+      "codebase_investigator",
+      "generalist",
+      "cli_help",
+      "ask_user"
+    ]
+  },
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"if ($args[0] -match '\\.(env|pem|key|secret|credentials|token)$') { Write-Error 'BLOCKED: tentativa de editar arquivo sensível'; exit 1 }\""
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"if ($input -match '(AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|PRIVATE.KEY|password\\s*=\\s*[^$])') { Write-Warning 'WARNING: possível segredo detectado no output do comando' }\""
+          }
+        ]
+      }
+    ]
+  }
+}

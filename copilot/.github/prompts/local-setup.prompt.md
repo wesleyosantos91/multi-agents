@@ -1,0 +1,21 @@
+---
+description: "Prompt reutilizavel do fluxo local-setup para Copilot Chat."
+---
+
+Acione o `devex-reviewer` para validar o ambiente de desenvolvimento local.
+
+## O que verificar
+- docker-compose.yml sobe todos os serviços necessários
+- Floci (porta 4566) está configurado e acessível
+- application-local.yml ou equivalente está completo e funcional
+- Makefile tem targets claros (build, test, deploy, local)
+- Onboarding é possível em 3-5 comandos máximo
+- Dev Container está configurado (se existir .devcontainer/)
+
+## Escopo
+- Se `{{ARGUMENTS}}` estiver vazio, valide o projeto inteiro
+- Se `{{ARGUMENTS}}` contiver um módulo, foque nele
+
+## Entrada do usuário
+{{ARGUMENTS}}
+

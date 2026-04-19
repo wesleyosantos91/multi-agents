@@ -1,3 +1,94 @@
 {
-  "defaultAgent": "staff-engineer-orchestrator"
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(make *)",
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(terraform *)",
+      "Bash(mvn *)",
+      "Bash(./mvnw *)",
+      "Bash(gradle *)",
+      "Bash(./gradlew *)",
+      "Bash(go *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(uv *)",
+      "Bash(ruff *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(java *)",
+      "Bash(javac *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(find *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(curl *)",
+      "Bash(aws *)",
+      "Bash(gh *)",
+      "Bash(jq *)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(env)",
+      "WebSearch(*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:search.maven.org)",
+      "WebFetch(domain:central.sonatype.com)",
+      "WebFetch(domain:mvnrepository.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:pkg.go.dev)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:registry.terraform.io)",
+      "WebFetch(domain:hub.docker.com)",
+      "WebFetch(domain:docs.aws.amazon.com)",
+      "WebFetch(domain:floci.io)",
+      "WebFetch(domain:spring.io)",
+      "WebFetch(domain:quarkus.io)",
+      "WebFetch(domain:micronaut.io)",
+      "WebFetch(domain:jakarta.ee)",
+      "WebFetch(domain:microprofile.io)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf .)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_FILE_PATH\"; if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qiE \"\\.(env|pem|key|secret|credentials|token)$\"; then echo \"BLOCKED: tentativa de editar arquivo sensível: $FILE\" >&2; exit 1; fi; exit 0'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_OUTPUT\" | grep -qiE \"(AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|PRIVATE.KEY|password\\s*=\\s*[^$])\" 2>/dev/null; then echo \"WARNING: possível segredo detectado no output do comando\" >&2; fi; exit 0'"
+          }
+        ]
+      }
+    ]
+  }
 }

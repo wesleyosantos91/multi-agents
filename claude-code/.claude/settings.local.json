@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('Deny patterns:'\\); [print\\(f' {x}'\\) for x in d['permissions']['deny']]; print\\('Hooks:'\\); [print\\(f' {k}: {len\\(v\\)} hook\\(s\\)'\\) for k,v in d['hooks'].items\\(\\)]\")",
+      "Bash(grep -l -i \"jmeter\" /c/Users/Administrador/.claude/skills/*.md)",
+      "Bash(grep -l -i \"serverless\" /c/Users/Administrador/.claude/skills/*.md)",
+      "WebFetch(domain:floci.io)"
+    ],
+    "deny": []
+  }
+}

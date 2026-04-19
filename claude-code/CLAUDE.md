@@ -15,14 +15,23 @@ O orquestrador consulta os especialistas, consolida achados, resolve conflitos e
 
 | Camada | Tecnologias |
 |--------|------------|
-| Linguagem | Java 25 |
-| Frameworks | Spring Boot, Quarkus, Micronaut |
-| Cloud | AWS |
-| Emulação local | LocalStack |
+| Linguagens backend | Java 25 · Python · Go |
+| Frameworks Java | Spring Boot, Quarkus, Micronaut |
+| Jakarta EE / MicroProfile | Jakarta EE 11 · MicroProfile 7.0 · WildFly · Open Liberty · Payara · TomEE |
+| Python | pyproject.toml, src layout, pytest, Ruff |
+| Go | go.mod, cmd/internal, interfaces idiomáticas |
+| Frontend | React (Vite + TypeScript) · Angular (versão atual, Standalone + Signals) · AngularJS (legado/migração) |
+| Mobile | Android (Kotlin + Jetpack Compose) · iOS (Swift + SwiftUI) |
+| Cloud | AWS (Lambda, API Gateway, EventBridge, SQS, SNS, Step Functions, DynamoDB, S3, ECS) |
+| Emulação local | Floci (emulador AWS local, porta 4566) |
 | Containerização | Docker |
 | IaC | Terraform |
 | Ambiente dev | Dev Container (opcional recomendado) |
-| Testes | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Java | JUnit 5, PIT (mutação), ArchUnit (arquitetura), Testcontainers (integração) |
+| Testes Python | pytest, fixtures, parametrize |
+| Testes Go | testing, table-driven, -race, testcontainers-go |
+| Testes Frontend | Jest, Testing Library, Playwright, MSW |
+| Testes Mobile | JUnit + Compose Test + Espresso (Android) · XCTest + XCUITest (iOS) |
 
 ---
 
@@ -228,7 +237,7 @@ Toda proposta, revisão ou implementação deve validar:
 ### Operabilidade
 - [ ] Readiness / liveness consistentes
 - [ ] Rollback previsível
-- [ ] Execução local reprodutível (Docker + LocalStack)
+- [ ] Execução local reprodutível (Docker + Floci)
 - [ ] Cloud-readiness para AWS
 
 ### Segurança
@@ -265,21 +274,91 @@ Toda proposta, revisão ou implementação deve validar:
 - [ ] Módulos, variáveis e outputs organizados
 - [ ] Separação por ambiente quando fizer sentido
 
+### Versões de dependências
+- [ ] Versão do framework (Spring Boot, Quarkus, Micronaut, Jakarta EE, MicroProfile) verificada via WebSearch — não por memória
+- [ ] Versão é GA (não RC, SNAPSHOT, M1, M2, Alpha, Beta)
+- [ ] Compatibilidade com Java 25 confirmada
+- [ ] Sem dependências com CVE crítico ou alto conhecidos
+- [ ] Sem dependências com EOL declarado
+
+### Compliance e proteção de dados
+- [ ] Dados pessoais mapeados (LGPD/GDPR)
+- [ ] Base legal para tratamento identificada
+- [ ] Dados pessoais ausentes de logs, traces e métricas
+- [ ] Residência de dados alinhada com região AWS (sa-east-1 para Brasil)
+- [ ] Retenção e descarte de dados pessoais definidos
+
+### FinOps (custo AWS)
+- [ ] Retenção de logs CloudWatch definida
+- [ ] Rightsizing de instâncias/containers avaliado
+- [ ] Tags de custo (cost allocation tags) nas resources Terraform
+- [ ] Sem anti-padrões de billing críticos (NAT Gateway desnecessário, logs ilimitados, etc.)
+
+### Experiência do desenvolvedor
+- [ ] Onboarding documentado (máximo 3-5 comandos para rodar localmente)
+- [ ] docker-compose sobe todos os serviços necessários
+- [ ] application-local.yml completo e funcional
+- [ ] Floci cobre os serviços AWS usados localmente
+
+### CI/CD e deploy
+- [ ] Pipeline CI: lint → test → build → package (jobs separados)
+- [ ] Pipeline CD: pull-artifact → terraform-plan → approval → terraform-apply → deploy → smoke-test
+- [ ] OIDC para AWS — sem credenciais de longa duração em CI
+- [ ] Lambda versions e aliases usados — não deploy direto em `$LATEST`
+- [ ] Canary ou blue/green para produção Lambda
+- [ ] Rollback documentado e testável em menos de 5 minutos
+- [ ] Terraform state em S3 com DynamoDB lock
+
+### SLOs, observabilidade e incident response
+- [ ] SLOs definidos por componente crítico
+- [ ] SLIs mapeados para métricas AWS reais
+- [ ] CloudWatch Alarms configurados para SLO breach
+- [ ] Runbook para cada alarme crítico
+- [ ] Template de postmortem definido
+- [ ] On-call e escalada documentados
+
+---
+
+## Regra de Versões de Dependências
+
+**Nenhum agente pode assumir versão de dependência por memória ou knowledge cutoff.**
+
+Sempre que houver criação ou modificação de `pom.xml`, `build.gradle`, `pyproject.toml`, `go.mod`, Terraform `required_providers` ou qualquer referência a framework/dependência/imagem Docker, o `dependency-versions-reviewer` deve ser acionado **antes** do `software-engineer`. Ele usa WebSearch para verificar a versão GA mais recente.
+
+- Nunca usar versões RC, SNAPSHOT, M1, M2, Alpha ou Beta em sistemas críticos
+- Sempre confirmar se a versão é GA e tem suporte ativo
+- O knowledge cutoff do modelo pode estar desatualizado — WebSearch é a fonte verdade
+- Inclui Terraform providers (`hashicorp/aws ~> X.Y`) e Docker base images (tag específica, não `latest`)
+
 ---
 
 ## Ordem Padrão de Consulta dos Agentes
 
 O `staff-engineer-orchestrator` deve consultar os agentes nesta ordem preferencial:
 
+0. `dependency-versions-reviewer` — **OBRIGATÓRIO** quando há dependências envolvidas: valida versões GA mais recentes via WebSearch antes de qualquer implementação
 1. `tech-lead-reviewer` — pragmatismo, simplicidade, manutenibilidade
 2. `architect-reviewer` — arquitetura, boundaries, trade-offs, resiliência
 3. `api-contract-reviewer` — contratos de borda, breaking changes, schema governance
 4. `security-reviewer` — segurança, hardening, superfícies de abuso
-5. `ad-dba-reviewer` — dados, persistência, modelagem, queries
-6. `software-engineer` — implementação mínima correta
-7. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
-8. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
-9. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+5. `compliance-reviewer` — LGPD, GDPR, residência de dados, direitos do titular
+6. `ad-dba-reviewer` — dados, persistência, modelagem, queries
+7. `data-engineering-aws-architect` — *(quando há pipelines de dados, ETL/ELT, data lake, streaming, Glue, EMR, Kinesis, Athena)* decisão arquitetural de dados
+8. `java-specialist` — *(quando stack Java com Spring Boot, Quarkus ou Micronaut)* estrutura, idiomatismo, ecossistema Java 25 + framework
+8. `jakarta-ee-specialist` — *(quando stack Jakarta EE, Java EE, MicroProfile ou servidor de aplicação certificado)* CDI, JAX-RS, JPA, JMS, MicroProfile FT/Config/Health — WildFly, Open Liberty, Payara, TomEE
+8. `python-specialist` — *(quando stack Python)* estrutura, idiomatismo, ecossistema Python
+8. `go-specialist` — *(quando stack Go)* estrutura, idiomatismo, ecossistema Go
+8. `frontend-specialist` — *(quando stack contém React, Angular ou AngularJS)* estrutura, idiomatismo, performance, a11y, testes frontend
+8. `mobile-native-specialist` — *(quando stack contém Android ou iOS nativos)* arquitetura, idiomatismo Kotlin/Swift, segurança mobile, CI/CD de store
+9. `software-engineer` — implementação mínima correta (após versões validadas)
+10. `sre-platform-engineer` — operação, deploy, observabilidade, IaC
+11. `cicd-pipeline-engineer` — *(quando há pipeline CI/CD, deploy strategy Lambda, Terraform em CI)* GitHub Actions, deploy blue/green/canary, rollback, quality gates
+12. `incident-response-reviewer` — *(quando o sistema vai para produção ou há SLAs definidos)* SLOs/SLIs, runbooks, postmortem, chaos engineering
+13. `finops-reviewer` — custo AWS, rightsizing, anti-padrões de billing
+14. `devex-reviewer` — onboarding, ambiente local, docker-compose, Dev Container (poliglota)
+15. `qa-quality-engineer` — testes, qualidade, edge cases, regressões
+16. `performance-reliability-reviewer` — throughput, latência, escalabilidade
+17. `tech-writer` — *(quando há mudança de comportamento, novo componente ou documentação desatualizada)* README, getting-started, testing, troubleshooting, ADRs, diagramas C4
 
 ---
 
@@ -317,11 +396,58 @@ O `staff-engineer-orchestrator` deve consultar os agentes nesta ordem preferenci
 ### AWS
 - Operação em cloud, serviços gerenciados, segurança operacional
 
-### LocalStack
-- Testes e desenvolvimento local, reprodutibilidade
+### Floci
+- Emulador AWS local — porta 4566, 31+ serviços
+- Healthcheck em `/_floci/health`
+- 4 modos de storage: memory, persistent, hybrid, wal
+- Consultar https://floci.io/floci/ para serviços e atualizações
 
 ### Docker
 - Ambiente local reprodutível, paridade com cloud
 
 ### Terraform
 - Módulos organizados, separação por ambiente, naming consistente
+
+---
+
+## Estrutura do Monorepo
+
+```
+poc-aws-lambda/
+├── lambdas/
+│   ├── lambda-java-quarkus/       # Java 25 + Quarkus
+│   ├── lambda-java-spring/        # Java 25 + Spring Boot
+│   ├── lambda-java-micronaut/     # Java 25 + Micronaut
+│   ├── lambda-go/                 # Go
+│   └── lambda-python/             # Python
+├── iac/
+│   └── terraform/
+│       ├── modules/               # módulos reutilizáveis (lambda, sqs, dynamodb, sns)
+│       └── environments/          # dev, staging, prod
+├── docs/
+│   ├── architecture/
+│   │   ├── adr/                   # Architecture Decision Records
+│   │   └── diagrams/              # Diagramas C4
+│   ├── getting-started.md
+│   ├── local-development.md
+│   └── troubleshooting.md
+├── .github/
+│   └── workflows/                 # GitHub Actions
+├── .claude/
+│   └── agents/                    # Agentes especializados
+├── docker-compose.yml             # Floci + dependências locais
+├── Makefile                       # Targets: build, test, deploy, local
+└── CLAUDE.md
+```
+
+---
+
+## ADRs — Decisões Arquiteturais
+
+Decisões arquiteturais significativas devem ser documentadas em `docs/architecture/adr/`. Ver template no `tech-writer` agent.
+
+Exemplos de ADRs que devem existir neste projeto:
+- ADR-0001: Escolha de DynamoDB para persistência de pedidos
+- ADR-0002: Uso de SQS + Lambda para processamento assíncrono
+- ADR-0003: ReportBatchItemFailures + DLQ como estratégia de error handling
+- ADR-0004: Floci como emulador local de AWS

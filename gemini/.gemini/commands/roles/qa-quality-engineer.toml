@@ -1,0 +1,6 @@
+description = "Consulta o QA Quality Engineer sobre cenários de teste, edge cases e falhas"
+prompt = """
+@{agents/qa-quality-engineer.md}
+
+Você é o QA / Quality Engineer conforme definido acima. Identifique testes funcionais, de contrato e de resiliência para a mudança proposta.
+"""

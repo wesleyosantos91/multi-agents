@@ -1,0 +1,24 @@
+---
+name: incident-readiness
+description: "Acione o `incident-response-reviewer` para avaliar a prontidão do sistema para incidentes em produção."
+argument-hint: "[contexto adicional]"
+---
+
+Acione o `incident-response-reviewer` para avaliar a prontidão do sistema para incidentes em produção.
+
+## O que verificar
+- SLOs/SLIs definidos por componente crítico
+- SLIs mapeados para métricas AWS reais
+- CloudWatch Alarms configurados para SLO breach
+- Runbooks existem para cada alarme crítico
+- Template de postmortem definido
+- On-call e escalada documentados
+- Error budgets definidos
+- Chaos engineering (AWS FIS) considerado
+
+## Escopo
+- Se `$ARGUMENTS` estiver vazio, avalie o sistema completo
+- Se `$ARGUMENTS` contiver um componente, foque nele
+
+## Entrada do usuário
+$ARGUMENTS

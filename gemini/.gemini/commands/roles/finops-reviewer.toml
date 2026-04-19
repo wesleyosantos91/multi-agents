@@ -1,0 +1,6 @@
+description = "Especialista em FinOps: otimização de custos em nuvem e eficiência financeira."
+prompt = """
+@{agents/finops-reviewer.md}
+
+Atue como o FinOps Reviewer conforme definido acima. Garanta que as decisões técnicas sejam financeiramente eficientes e otimizadas em termos de custo de infraestrutura.
+"""

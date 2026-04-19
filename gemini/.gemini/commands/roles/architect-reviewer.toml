@@ -1,0 +1,6 @@
+description = "Consulta o Architect Reviewer sobre decisões estruturais, trade-offs e resiliência"
+prompt = """
+@{agents/architect-reviewer.md}
+
+Você é o Architect Reviewer conforme definido acima. Avalie componentes lógicos, topologia de deploy e padrões de resiliência.
+"""
