@@ -1,0 +1,27 @@
+description = "Execute um checklist completo antes de abrir PR. Acione o `staff-engineer-orchestrator` com os seguintes passos:"
+prompt = """
+Execute um checklist completo antes de abrir PR. Acione o `@{agents/staff-engineer-orchestrator.md}` com os seguintes passos:
+
+## 1. Diff Analysis
+- `git diff main...HEAD` para entender todas as mudanças
+- Liste arquivos alterados, adicionados e removidos
+
+## 2. Checklist por domínio (acione agentes conforme necessário)
+- **@{agents/tech-lead-reviewer.md}**: pragmatismo, simplicidade, manutenibilidade
+- **@{agents/security-reviewer.md}**: segredos, OWASP, hardening
+- **@{agents/qa-quality-engineer.md}**: cobertura de testes, edge cases, regressões
+- **@{agents/api-contract-reviewer.md}**: breaking changes (se houver mudança de contrato)
+- **@{agents/dependency-versions-reviewer.md}**: versões GA atualizadas (se houver dependências novas/alteradas)
+
+## 3. Validações automáticas
+- Verifique se os testes passam (mvn test, go test, pytest, npm test — conforme stack)
+- Verifique se há arquivos com segredos (.env, credentials, tokens)
+- Verifique se há TODOs/FIXMEs pendentes nas mudanças
+
+## 4. Output
+Entregue um relatório estruturado: GO / NO-GO com justificativa por item.
+
+## Contexto adicional
+$ARGUMENTS
+
+"""

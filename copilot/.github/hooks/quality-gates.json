@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "powershell": "Write-Host \"[quality-gates] Sessao iniciada. Politicas ativas.\""
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/pre-tool-policy.ps1"
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/post-tool-audit.ps1"
+      }
+    ]
+  }
+}

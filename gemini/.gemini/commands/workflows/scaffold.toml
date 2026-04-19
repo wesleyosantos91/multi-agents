@@ -1,0 +1,37 @@
+description = "Crie a estrutura de um novo módulo/componente seguindo os padrões do projeto."
+prompt = """
+Crie a estrutura de um novo módulo/componente seguindo os padrões do projeto.
+
+## Processo obrigatório
+
+### 1. Detecção de padrões
+- Leia a estrutura de módulos existentes no projeto (Glob + Read)
+- Identifique convenções: nomes de pacotes, organização de pastas, configuração, testes
+- Identifique o padrão de build (pom.xml, build.gradle, pyproject.toml, go.mod)
+
+### 2. Scaffolding
+- Crie a estrutura seguindo **exatamente** os padrões detectados
+- Inclua: código principal, testes, configuração, build file
+- Siga a arquitetura definida no GEMINI.md (web/, message/, core/, domain/, infrastructure/)
+- Use as versões de dependências já existentes no projeto — não invente versões
+
+### 3. Validação
+- Confirme que o build compila/importa sem erros
+- Confirme que os testes do scaffold passam
+- Confirme que a estrutura é consistente com os módulos existentes
+
+### 4. Output
+Entregue:
+- **Arquivos criados**: lista completa
+- **Padrões seguidos**: quais módulos existentes serviram de referência
+- **Próximos passos**: o que o desenvolvedor precisa fazer para completar a implementação
+
+## Agentes disponíveis (quando necessário)
+- Se envolver dependências novas: acione `@{agents/dependency-versions-reviewer.md}` antes de criar
+- Para a criação: use `@{agents/software-engineer.md}`
+- Para validar aderência: acione `@{agents/tech-lead-reviewer.md}`
+
+## O que criar
+$ARGUMENTS
+
+"""

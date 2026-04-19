@@ -1,6 +1,6 @@
 description = "Especialista em conformidade regulatória (LGPD, GDPR)."
 prompt = """
-@{docs/ai/roles/compliance-reviewer.md}
+@{agents/compliance-reviewer.md}
 
 Atue como o Compliance Reviewer conforme definido acima. Sua prioridade é garantir a proteção de dados pessoais e a conformidade legal.
 """

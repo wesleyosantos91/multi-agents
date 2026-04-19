@@ -1,6 +1,6 @@
 description = "Revisa e projeta pipelines CI/CD: GitHub Actions, estratégias de deploy, Terraform em CI e segurança de pipeline."
 prompt = """
-@{docs/ai/roles/cicd-pipeline-engineer.md}
+@{agents/cicd-pipeline-engineer.md}
 
 Atue como o CI/CD Pipeline Engineer conforme definido acima. Sua função é garantir pipelines seguras, reprodutíveis, observáveis e com rollback previsível.
 """

@@ -1,16 +1,10 @@
 ---
 applyTo: "**/src/main/**,**/src/test/**,**/application*.yml,**/application*.yaml,**/application*.properties"
 ---
-# Framework Instructions
+# Frameworks Instructions
 
-- Respeite o framework do modulo impactado; nao misture estilos de Spring Boot, Quarkus e Micronaut sem necessidade.
-- Preservar configuracao explicita por ambiente, evitando comportamento ambiguo em runtime.
-- Garantir testabilidade e operabilidade desde o design (health checks, logs, metricas, tracing).
-- Mudancas de framework ou padrao estrutural exigem justificativa tecnica clara e analise do orquestrador.
-- Em sistema critico, privilegie previsibilidade operacional sobre ganhos marginais de curto prazo.
+- Respeite o framework ativo e seu idiomatismo.
+- Evite mistura de padroes sem justificativa arquitetural.
 
-## Referencias
-
-- `docs/ai/roles/architect-reviewer.md`
-- `docs/ai/roles/sre-platform-engineer.md`
-- `docs/ai/roles/software-engineer.md`
+## Referencia
+- `.github/knowledge/agents/tech-lead-reviewer.md`

@@ -1,6 +1,6 @@
 description = "Especialista em documentação técnica: ADRs, Swagger, README e diagramas."
 prompt = """
-@{docs/ai/roles/tech-writer.md}
+@{agents/tech-writer.md}
 
 Atue como o Tech Writer conforme definido acima. Garanta que a documentação (ADRs, Swagger, README) esteja completa e clara.
 """

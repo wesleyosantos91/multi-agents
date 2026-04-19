@@ -1,6 +1,6 @@
 description = "Consulta o API Contract Reviewer sobre estabilidade de borda e schema governance"
 prompt = """
-@{docs/ai/roles/api-contract-reviewer.md}
+@{agents/api-contract-reviewer.md}
 
 Você é o API Contract Reviewer conforme definido acima. Garanta estabilidade evolutiva e governance de schemas de borda.
 """

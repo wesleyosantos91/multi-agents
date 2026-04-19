@@ -1,148 +1,201 @@
-# Multi-Agent Orchestration para Google Gemini CLI
+# Multi-Agent Orchestration para Gemini CLI
 
 ## O que é isso?
 
-Uma estrutura de **orquestração por papéis virtuais** nativa para o [Gemini CLI](https://github.com/google/gemini-cli) que transforma o seu terminal em um **time de engenharia completo**.
+Uma estrutura de **orquestração multiagente** nativa para o [Gemini CLI](https://github.com/google/gemini-cli) que simula um **time de engenharia completo** dentro do seu terminal.
 
-O repositório utiliza o conceito de **Contexto Persistente** e **Comandos Customizados** para que o Gemini atue como um **Staff Engineer Orchestrator**, capaz de invocar especialistas para revisões de segurança, arquitetura, dados e implementação.
+Em vez de um único agente fazendo tudo, você tem **24 agentes especializados** — cada um com papel, escopo, checklist e formato de saída definidos — coordenados por um **orquestrador principal** (o `staff-engineer-orchestrator`) que funciona como maestro.
 
----
+Além dos agentes, o projeto inclui **33 slash commands customizados**, **45 skills globais reutilizáveis**, **permissões granulares**, **hooks de segurança** e uma configuração completa para workflow profissional.
 
-## Pré-requisitos
+### Analogia simples
 
-1. Instale o Gemini CLI:
-   ```bash
-   npm install -g @google/gemini-cli
-   ```
-2. Autentique com sua conta Google ou configure sua `GEMINI_API_KEY`:
-   ```bash
-   gemini auth login
-   # ou
-   export GEMINI_API_KEY="sua-chave-aqui"
-   ```
-3. Execute o Gemini CLI **dentro do diretório `gemini/`** do repositório para que o `GEMINI.md` e os comandos customizados sejam carregados automaticamente:
-   ```bash
-   cd gemini/
-   gemini
-   ```
+Imagine que você tem uma demanda técnica complexa. Em vez de pedir para um único engenheiro resolver tudo sozinho, você:
+
+1. Leva a demanda para o **staff engineer** (orquestrador)
+2. Ele distribui a análise para os especialistas do time
+3. Cada especialista analisa sob sua perspectiva
+4. O staff engineer consolida tudo, resolve conflitos e entrega o plano final
+
+Isso é exatamente o que essa estrutura faz — automaticamente, dentro do Gemini CLI.
 
 ---
 
-## Estrutura de Orquestração Nativa
+## Por que usar?
 
-A estrutura atual segue o padrão oficial do Gemini CLI:
+### O problema
 
-| Componente | Arquivo / Pasta | Função |
-| :--- | :--- | :--- |
-| **Constituição** | `GEMINI.md` | Define o comportamento global e a persona do Orquestrador. |
-| **Configuração** | `.gemini/settings.json` | Configurações do projeto e metadados. |
-| **Comandos (Agentes)** | `.gemini/commands/` | Atalhos TOML que invocam papéis especializados. |
-| **Base de Conhecimento** | `docs/ai/` | Documentação técnica que serve de contexto para os agentes. |
+Quando você usa um único agente de IA para tarefas complexas:
+
+- Ele tenta resolver tudo de uma vez, sem análise adequada
+- Perde perspectivas importantes (segurança, performance, operabilidade)
+- Não diferencia risco crítico de melhoria futura
+- Não considera trade-offs sob múltiplas perspectivas
+- Tende a overengineering ou a soluções incompletas
+
+### A solução
+
+Com multiagentes, cada especialista foca no que sabe. O orquestrador garante que nenhuma perspectiva é ignorada e que a resposta final é consolidada e priorizada.
+
+### Ganhos concretos
+
+| Ganho | Descrição |
+|-------|-----------|
+| **Cobertura ampla** | 24 perspectivas especializadas em vez de uma genérica |
+| **Stack poliglota** | Suporte nativo a Java, Python, Go, Frontend, Mobile e AWS Serverless |
+| **Slash commands** | Atalhos para ações frequentes — `/review`, `/implement`, `/debug`, `/refactor`, etc. |
+| **Segurança integrada** | Hooks que bloqueiam edição de arquivos sensíveis e alertam sobre segredos |
+| **Qualidade de análise** | Cada agente tem checklist e regras mandatórias do seu domínio |
+| **Rastreabilidade** | Saída estruturada com seções fixas — fácil de auditar e comparar |
+| **Conflitos explícitos** | Quando dois agentes discordam, o orquestrador explicita e resolve |
+| **Priorização** | Plano final ordenado por prioridade com justificativa |
+| **Riscos visíveis** | Riscos remanescentes listados explicitamente |
+| **Reproducibilidade** | Mesma estrutura de resposta toda vez, independente da demanda |
+| **Escalabilidade do time** | Fácil adicionar novos agentes sem quebrar o fluxo |
+
+**Regra prática**: use o orquestrador para demandas não triviais. Para tarefas simples, use um slash command direto ou acione o agente relevante.
 
 ---
 
-## Como Usar no Gemini CLI
+## Estrutura do repositório
 
-Com o Gemini CLI instalado e configurado no repositório, você tem acesso imediato à orquestração.
-
-### 1. Orquestração Principal (Default)
-Ao iniciar uma conversa normal, o Gemini já lê o `GEMINI.md` e assume o papel de **Staff Engineer Orchestrator**. Ele coordena a visão geral e planeja as mudanças.
-
-### 2. Comandos Multiagente (Especialistas)
-Você pode invocar especialistas diretamente para tarefas específicas usando a sintaxe `/comando`:
-
-| Comando | Papel | Quando usar |
-| :--- | :--- | :--- |
-| `/upgrade-plan` | **Orchestrator** | Criar planos complexos de refatoração ou migração. |
-| `/review-architecture` | **Architect + Orchestrator** | Revisar limites de sistema, resiliência e trade-offs. |
-| `/dependency-versions-reviewer` | **Versions** | Validar versões GA de dependências via WebSearch. |
-| `/tech-lead-reviewer` | **Tech Lead** | Validar simplicidade e evitar débitos técnicos. |
-| `/architect-reviewer` | **Architect** | Decisões estruturais, acoplamento e coesão. |
-| `/api-contract-reviewer` | **API Contract** | Estabilidade de contratos, breaking changes e schema governance. |
-| `/security-reviewer` | **Security** | Validar vulnerabilidades, auth e hardening. |
-| `/compliance-reviewer` | **Compliance** | LGPD, GDPR, residência de dados e direitos do titular. |
-| `/ad-dba-reviewer` | **DBA** | Revisar modelagem de dados, queries e índices. |
-| `/data-engineering-aws-architect` | **Data Engineering** | Pipelines, ETL/ELT, Glue, EMR, Kinesis, trade-offs de dados AWS. |
-| `/java-specialist` | **Java** | Estrutura, idiomatismo Java 25, Spring Boot, Quarkus, Micronaut. |
-| `/python-specialist` | **Python** | Estrutura, pyproject.toml, pytest, Ruff, Lambda Python. |
-| `/go-specialist` | **Go** | Estrutura, go.mod, interfaces, context, table-driven tests. |
-| `/jakarta-ee-specialist` | **Jakarta EE** | Java EE, MicroProfile, servidores de aplicação (WildFly, Liberty). |
-| `/frontend-specialist` | **Frontend** | React, Angular, AngularJS (legado), performance e a11y. |
-| `/mobile-native-specialist` | **Mobile** | Android (Kotlin/Compose), iOS (Swift/SwiftUI), segurança mobile. |
-| `/software-engineer` | **Developer** | Gerar implementação mínima, pragmática e correta. |
-| `/cicd-pipeline-engineer` | **CI/CD** | Pipelines seguras, GitHub Actions, deploy canary/blue-green. |
-| `/sre-platform-engineer` | **SRE** | Ajustar CI/CD, Terraform, Observabilidade e IaC. |
-| `/incident-response-reviewer` | **Incident Response** | SLOs/SLIs, runbooks, on-call e chaos engineering (AWS FIS). |
-| `/finops-reviewer` | **FinOps** | Custo AWS, rightsizing e anti-padrões de billing. |
-| `/devex-reviewer` | **DevEx** | Onboarding, ambiente local, docker-compose, Dev Container. |
-| `/qa-quality-engineer` | **QA** | Cenários de teste, edge cases e riscos de regressão. |
-| `/performance-reliability-reviewer` | **Performance** | Throughput, latência, GC e escalabilidade. |
-| `/tech-writer` | **Tech Writer** | README, getting-started, testing, troubleshooting. |
-
-#### Exemplos de Uso no Terminal:
-
-```bash
-# Pedir uma revisão de segurança focada
-/security-reviewer "Revise a lógica de JWT no Controller de autenticação"
-
-# Solicitar um plano de arquitetura para um novo microsserviço
-/review-architecture "Desenhe a integração assíncrona entre o Checkout e o Estoque"
-
-# Pedir código seguindo os padrões do projeto
-/software-engineer "Crie o repositório JPA para a entidade Order com suporte a paginação"
+```
+.
+├── GEMINI.md                                          # Governança do projeto e diretrizes de orquestração
+├── README.md                                          # Este arquivo
+└── .gemini/
+    ├── settings.json                                  # Permissões, hooks e configuração do CLI
+    ├── commands/                                      # Slash commands customizados (workflows e reviews)
+    │   ├── reviews/                                   # Comandos de revisão (arch-review, security-check, etc)
+    │   │   └── arch-review.toml                       # Exemplo de revisão arquitetural
+    │   ├── roles/                                     # Comandos para invocar os especialistas diretamente
+    │   └── workflows/                                 # Comandos operacionais (debug, refactor, implement, etc)
+    │       └── implement.toml                         # Exemplo de comando de workflow
+    ├── agents/                                        # 24 agentes especializados em Markdown
+    │   ├── staff-engineer-orchestrator.md             # Maestro principal
+    │   ├── dependency-versions-reviewer.md            # Versões GA de dependências
+    │   ├── tech-lead-reviewer.md                      # Pragmatismo e manutenibilidade
+    │   ├── architect-reviewer.md                      # Arquitetura e boundaries
+    │   ├── api-contract-reviewer.md                   # Contratos de borda e schema governance
+    │   ├── security-reviewer.md                       # Segurança e hardening
+    │   ├── compliance-reviewer.md                     # LGPD, GDPR, compliance
+    │   ├── ad-dba-reviewer.md                         # Dados e persistência
+    │   ├── data-engineering-aws-architect.md          # Pipelines de dados
+    │   ├── java-specialist.md                         # Java 25, Spring Boot, Quarkus, Micronaut
+    │   ├── jakarta-ee-specialist.md                   # Jakarta EE 11, MicroProfile
+    │   ├── python-specialist.md                       # Python, FastAPI, Pytest
+    │   ├── go-specialist.md                           # Go, go.mod, testing
+    │   ├── frontend-specialist.md                     # React, Angular
+    │   ├── mobile-native-specialist.md                # Android, iOS
+    │   ├── software-engineer.md                       # Implementação mínima correta
+    │   ├── sre-platform-engineer.md                   # Operabilidade, IaC
+    │   ├── cicd-pipeline-engineer.md                  # Deploy, rollback
+    │   ├── incident-response-reviewer.md              # SLOs, runbooks
+    │   ├── finops-reviewer.md                         # Custo AWS
+    │   ├── devex-reviewer.md                          # Onboarding, dev local
+    │   ├── qa-quality-engineer.md                     # Testes e qualidade
+    │   ├── performance-reliability-reviewer.md        # Performance
+    │   └── tech-writer.md                             # Documentação técnica
+    └── skills/                                        # 45 skills globais reutilizáveis
+        ├── java-spring-patterns.md
+        ├── python-fastapi-patterns.md
+        ├── aws-architecture-patterns.md
+        ├── code-review.md
+        └── ...
 ```
 
 ---
 
-## Ordem de Consulta (Workflow)
+## Slash Commands — Referência rápida
 
-O Orquestrador segue esta ordem lógica de raciocínio (definida em `docs/ai/orchestration/`):
-1. **Diagnóstico Inicial** da demanda.
-2. **Consulta aos Especialistas** pertinentes (Tech Lead -> Architect -> Security -> ...).
-3. **Resolução de Conflitos** entre recomendações técnicas.
-4. **Plano Final Priorizado** e entrega do código/documentação.
+### Orquestração
 
----
+| Comando | Agente(s) | Propósito |
+|---------|-----------|-----------|
+| `/review` | staff-engineer-orchestrator | Revisão inteligente com triage automático |
+| `/full-review` | staff-engineer-orchestrator | Revisão completa — todos os agentes relevantes |
+| `/implement` | staff-engineer-orchestrator | Análise + implementação de demanda |
+| `/pre-pr` | staff-engineer-orchestrator | Checklist GO/NO-GO antes de abrir PR |
 
-## Estrutura do Repositório
+### Revisões especializadas
 
-```text
-gemini/
-├── GEMINI.md                                              # Regras e Persona Principal
-├── .gemini/
-│   ├── settings.json                                      # Configuração do CLI
-│   └── commands/                                          # Definição dos Comandos (Agentes)
-│       ├── orchestrate/                                   # Comandos de Fluxo
-│       └── roles/                                         # Comandos de Especialistas
-└── docs/ai/
-    ├── orchestration/                                     # Lógica do Staff Engineer
-    └── roles/                                             # Detalhamento de cada Papel (MD)
-```
+| Comando | Agente(s) | Propósito |
+|---------|-----------|-----------|
+| `/arch-review` | architect-reviewer | Arquitetura, boundaries, trade-offs |
+| `/security-check` | security-reviewer | Segurança, OWASP, hardening |
+| `/compliance` | compliance-reviewer | LGPD/GDPR, residência de dados |
+| `/contract-review` | api-contract-reviewer | Contratos, breaking changes, schema |
+| `/check-deps` | dependency-versions-reviewer | Versões GA via WebSearch |
+| `/data-review` | ad-dba-reviewer | Dados, persistência, modelagem |
+| `/qa-review` | qa-quality-engineer | Testes, edge cases, regressões |
+| `/perf-review` | performance-reliability-reviewer | Throughput, latência, escalabilidade |
+| `/sre-review` | sre-platform-engineer | Operabilidade, deploy, observabilidade |
+| `/cicd-review` | cicd-pipeline-engineer | Pipelines CI/CD, deploy strategy |
 
----
+### Workflows de desenvolvimento
 
-## Como Adicionar um Novo Especialista
+| Comando | Tipo | Propósito |
+|---------|------|-----------|
+| `/debug` | Workflow | Investigação sistemática de causa raiz com reprodução |
+| `/refactor` | Workflow | Refatoração segura com mapeamento de dependentes |
+| `/scaffold` | Workflow | Criar novo módulo/componente seguindo padrões |
+| `/test-gen` | Workflow | Gerar ou melhorar testes com cobertura de comportamentos |
 
-1. **Crie a documentação:** Adicione um arquivo `.md` em `docs/ai/roles/` com o escopo, regras e checklist do papel.
-
-2. **Crie o comando:** Adicione um arquivo `.toml` em `.gemini/commands/roles/` com o seguinte formato:
-   ```toml
-   description = "Descrição curta exibida no /help"
-   prompt = """
-   @{docs/ai/roles/nome-do-papel.md}
-
-   Você é o [Nome do Papel] conforme definido acima. [Instrução resumida de persona e prioridade.]
-   """
-   ```
-   > O `@{path}` injeta o conteúdo do arquivo no prompt no momento da invocação.
-
-3. **Registre:** Adicione o novo comando na lista de comandos do `GEMINI.md`.
+Todos os comandos aceitam argumentos diretos. Exemplo: `/debug o endpoint /orders retorna 500 quando o payload tem campo opcional nulo`
 
 ---
 
-## Portabilidade para outros Projetos
+## Permissões e Segurança
 
-Para levar essa inteligência para outro repositório:
-1. Copie as pastas `.gemini/` e `docs/ai/`.
-2. Copie o arquivo `GEMINI.md`.
-3. Ajuste as referências de stack tecnológica no `GEMINI.md` e nos arquivos de `docs/ai/`.
+### Permissões (`.gemini/settings.json`)
+
+O projeto configura permissões e limites para evitar operações danosas e garantir fluidez nas ações rotineiras:
+
+**Ferramentas Essenciais Permitidas:**
+- `run_shell_command`, `read_file`, `write_file`, `replace`
+- `glob`, `grep_search`, `list_directory`
+- `google_web_search`, `web_fetch`
+
+### Hooks de segurança
+
+O `settings.json` inclui hooks automáticos do tipo `BeforeTool` e `AfterTool` para monitoramento constante:
+
+| Hook | Trigger | Ação |
+|------|---------|------|
+| BeforeTool | `replace` ou `write_file` | **Bloqueia** edição de arquivos sensíveis (`.env`, `.pem`, `.key`, `.secret`, `.credentials`, `.token`) |
+| AfterTool | `run_shell_command` | **Alerta** no console se o output contiver possíveis segredos vazados (AWS_SECRET_ACCESS_KEY, PRIVATE.KEY, etc.) |
+
+---
+
+## Como os agentes são definidos
+
+Cada agente é um arquivo Markdown em `.gemini/agents/`. O conteúdo é apenas texto focado nas instruções, otimizado para o Gemini CLI.
+
+O corpo Markdown define:
+- **Papel** — o que o agente faz
+- **Escopo** — o que ele deve revisar ou implementar
+- **Stack e contexto** — tecnologias que ele conhece
+- **Regras mandatórias** — restrições que ele deve seguir
+- **Checklist** — itens que ele deve verificar
+- **Modo rápido** — formato compacto para respostas breves
+- **Formato de saída** — seções obrigatórias na resposta
+
+---
+
+## Como criar um novo agente
+
+1. Crie o arquivo Markdown com as instruções do papel em `.gemini/agents/`.
+2. Adicione na ordem de consulta do Orquestrador (`.gemini/agents/staff-engineer-orchestrator.md`).
+3. Adicione um comando correspondente em formato TOML (ex: `meu-novo-agente.toml`) em `.gemini/commands/roles/` apontando para o arquivo com `@{agents/meu-novo-agente.md}`.
+
+---
+
+## Papel do GEMINI.md
+
+O `GEMINI.md` é o documento de governança do projeto. O Gemini CLI lê esse arquivo automaticamente para injetar contexto global na sessão.
+
+Todos os agentes respeitam as diretrizes consolidadas no `GEMINI.md`.
+
+## Referências
+
+- [Gemini CLI — GitHub](https://github.com/google/gemini-cli)

@@ -1,8 +1,8 @@
 description = "Realiza uma revisão de arquitetura com o Staff Engineer e o Architect Reviewer"
 prompt = """
-@{docs/ai/orchestration/staff-engineer-orchestrator.md}
+@{agents/staff-engineer-orchestrator.md}
 
-@{docs/ai/roles/architect-reviewer.md}
+@{agents/architect-reviewer.md}
 
 Atue como orquestrador junto ao Arquiteto conforme definido acima. Avalie limites, trade-offs e impacto na infraestrutura.
 """

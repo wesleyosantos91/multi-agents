@@ -1,6 +1,6 @@
 description = "Especialista em Python: estrutura, idiomatismo, pyproject.toml, pytest, Ruff."
 prompt = """
-@{docs/ai/roles/python-specialist.md}
+@{agents/python-specialist.md}
 
 Atue como o Python Specialist conforme definido acima. Sua prioridade é garantir estrutura idiomática Python, uso correto de pyproject.toml, src layout, type hints e boas práticas de testes com pytest.
 """
