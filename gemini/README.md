@@ -182,11 +182,191 @@ O corpo Markdown define:
 
 ---
 
-## Como criar um novo agente
+## Como adicionar novas configurações
 
-1. Crie o arquivo Markdown com as instruções do papel em `.gemini/agents/`.
-2. Adicione na ordem de consulta do Orquestrador (`.gemini/agents/staff-engineer-orchestrator.md`).
-3. Adicione um comando correspondente em formato TOML (ex: `meu-novo-agente.toml`) em `.gemini/commands/roles/` apontando para o arquivo com `@{agents/meu-novo-agente.md}`.
+Todos os pontos de extensão do Gemini CLI neste projeto.
+
+### 1. Novo agente
+
+**Arquivo**: `.gemini/agents/<nome-do-agente>.md`
+
+```markdown
+# Meu Novo Agente
+
+Você é o [papel] de um sistema crítico, com stack poliglota (Java, Python, Go) e suporte a AWS Serverless.
+
+## Escopo de revisão
+- Item 1
+- Item 2
+
+## Regras mandatórias
+- Regra 1
+
+## Checklist de revisão
+- [ ] Check 1?
+
+## Modo rápido
+- **Veredicto**: uma linha
+- 3 bullets + ação prioritária
+
+## Formato de saída obrigatório
+### 1. Seção 1
+### 2. Seção 2
+```
+
+**Registrar o agente**:
+1. Adicionar na ordem de consulta do `.gemini/agents/staff-engineer-orchestrator.md`.
+2. Criar um comando correspondente em `.gemini/commands/roles/<nome>.toml` apontando para o agente.
+3. Atualizar o `GEMINI.md` com o novo papel.
+
+---
+
+### 2. Novo slash command
+
+Os comandos ficam em `.gemini/commands/<categoria>/<nome>.toml`. Categorias em uso:
+
+| Pasta | Proposito | Exemplos |
+|-------|-----------|----------|
+| `orchestrate/` | Entradas de alto nivel | `review-architecture`, `upgrade-plan` |
+| `reviews/` | Revisoes especializadas | `arch-review`, `security-check`, `qa-review` |
+| `roles/` | Invocar um especialista diretamente | `ad-dba-reviewer`, `security-reviewer` |
+| `workflows/` | Operacoes e investigacoes | `debug`, `refactor`, `implement`, `test-gen` |
+
+**Comando do tipo `roles/` (delegação a um agente)**:
+
+```toml
+description = "Consulta o Meu Novo Agente sobre [foco]"
+prompt = """
+@{agents/meu-novo-agente.md}
+
+Você é o Meu Novo Agente conforme definido acima. Foco em [objetivo].
+"""
+```
+
+**Comando do tipo `workflows/` (fluxo operacional)**:
+
+```toml
+description = "Descrição curta do que o comando faz"
+prompt = """
+Instruções passo a passo do workflow.
+
+## Agentes disponíveis (quando necessário)
+- Para segurança: acione `@{agents/security-reviewer.md}`
+- Para implementação: use `@{agents/software-engineer.md}`
+
+## Entrada do usuário
+$ARGUMENTS
+"""
+```
+
+A diretiva `@{agents/<nome>.md}` importa o conteúdo do agente. `$ARGUMENTS` captura o texto que o usuário digita após o comando.
+
+---
+
+### 3. Nova skill
+
+**Arquivo**: `.gemini/skills/<nome>/SKILL.md` (ou `.gemini/skills/<nome>.md` para skills simples)
+
+```markdown
+---
+name: minha-skill
+description: Conhecimento procedural reutilizável sobre X. Dispara quando o contexto envolve Y.
+---
+
+# Skill: minha-skill
+
+## Quando aplicar
+- Contexto A
+- Contexto B
+
+## Conteúdo
+Passos, exemplos e templates reutilizáveis.
+```
+
+Skills são carregadas automaticamente quando o contexto corresponde ao `description` — não exigem registro em `settings.json`.
+
+---
+
+### 4. Nova permissão de ferramenta
+
+Edite `.gemini/settings.json`:
+
+```jsonc
+{
+  "tools": {
+    "allowed": [
+      "run_shell_command",
+      "google_web_search",
+      "web_fetch",
+      "read_file",
+      "write_file",
+      "replace",
+      "glob",
+      "grep_search",
+      "list_directory",
+      "minha_ferramenta_nova"
+    ]
+  }
+}
+```
+
+Apenas ferramentas listadas em `tools.allowed` podem ser acionadas pelos agentes.
+
+---
+
+### 5. Novo hook
+
+Edite `.gemini/settings.json`:
+
+```jsonc
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"... política ...\""
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -Command \"... auditoria ...\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+`BeforeTool` pode bloquear a ação (exit != 0). `AfterTool` roda após a execução — útil para alertas e auditoria.
+
+---
+
+### 6. Atualizar o GEMINI.md
+
+Toda mudança em governança (novo papel, nova regra transversal, mudança de fluxo) deve refletir no `GEMINI.md`. Ele é lido automaticamente pelo Gemini CLI no início da sessão.
+
+---
+
+### Checklist antes de mergear
+
+- [ ] Arquivo do agente em `.gemini/agents/` + comando em `.gemini/commands/roles/`?
+- [ ] `GEMINI.md` atualizado com o novo papel?
+- [ ] Ordem de consulta do `staff-engineer-orchestrator.md` atualizada?
+- [ ] Comando TOML tem `description` e `prompt` claros?
+- [ ] Skill tem `description` específico para ativação correta?
+- [ ] `settings.json` ajustado se a nova config precisa de ferramenta ou hook novo?
+- [ ] README atualizado com contagens e propósito do novo item?
+- [ ] Paridade com as outras plataformas (`claude-code/`, `codex/`, `copilot/`)?
 
 ---
 

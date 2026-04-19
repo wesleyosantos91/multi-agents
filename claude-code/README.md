@@ -274,13 +274,13 @@ O orquestrador segue esta ordem preferencial:
 
 ---
 
-## Skills Globais (`~/.claude/skills/`)
+## Skills (`.claude/skills/`)
 
-Alem dos agentes e slash commands (que sao especificos deste projeto), o repositorio inclui **45 skills globais** instaladas em `~/.claude/skills/`. Skills sao diferentes de commands:
+Alem dos agentes e slash commands, o repositorio inclui **46 skills** em `.claude/skills/`. Skills sao diferentes de commands:
 
-| Aspecto | Commands (`.claude/commands/`) | Skills (`~/.claude/skills/`) |
-|---------|-------------------------------|------------------------------|
-| Escopo | Projeto atual | **Todos os projetos** |
+| Aspecto | Commands (`.claude/commands/`) | Skills (`.claude/skills/`) |
+|---------|-------------------------------|---------------------------|
+| Escopo | Projeto atual | Projeto atual (pode ser promovido para `~/.claude/skills/`) |
 | Ativacao | `/nome` explicito | **On-demand automatico** quando relevante |
 | Custo de tokens | Carrega ao invocar | **Zero ate ser usado** |
 | Conteudo | Workflows que acionam agentes | Conhecimento procedural reutilizavel |
@@ -376,13 +376,12 @@ Alem dos agentes e slash commands (que sao especificos deste projeto), o reposit
 | `database-migration` | Zero-downtime, expand-contract, backfill, rollback |
 | `dependency-upgrade` | Processo seguro de upgrade por ecossistema |
 
-### Como instalar
+### Escopo local vs global
 
-As skills ficam em `~/.claude/skills/`. Para usar em qualquer projeto:
+As skills deste projeto ficam em `.claude/skills/` (escopo do repo). Para disponibilizar em qualquer projeto:
 
-1. Copie a pasta `skills/` para `~/.claude/skills/`
-2. Copie o `SKILL.md` (indice) para `~/.claude/skills/SKILL.md`
-3. Pronto — o Claude Code carrega automaticamente quando relevante
+1. Copie os arquivos desejados para `~/.claude/skills/`
+2. O Claude Code carrega automaticamente quando o contexto corresponder
 
 ---
 
@@ -545,31 +544,25 @@ Apos o frontmatter, o conteudo Markdown define:
 
 ---
 
-## Como criar um novo agente
+## Como adicionar novas configuracoes
 
-### Passo 1: Crie o arquivo
+Todos os pontos de extensao do Claude Code neste projeto.
 
-```bash
-touch .claude/agents/meu-novo-agente.md
-```
+### 1. Novo agente
 
-### Passo 2: Defina o frontmatter
+**Arquivo**: `.claude/agents/<nome-do-agente>.md`
 
-```yaml
+```markdown
 ---
 name: meu-novo-agente
-description: "Descricao curta e objetiva do papel."
+description: "Descricao curta. Use para X, Y, Z."
 tools:
   - Read
   - Glob
   - Grep
 model: sonnet
 ---
-```
 
-### Passo 3: Escreva as instrucoes
-
-```markdown
 # Meu Novo Agente
 
 Voce e o [papel] de um sistema critico, com stack poliglota (Java, Python, Go)
@@ -598,22 +591,16 @@ Quando acionado com escopo restrito, responda com:
 ### 2. Secao 2
 ```
 
-### Passo 4: Crie um slash command (opcional)
-
-```bash
-touch .claude/commands/meu-command.md
-```
-
-### Passo 5: Registre no orquestrador e CLAUDE.md
-
-1. Adicione na ordem de consulta em `.claude/agents/staff-engineer-orchestrator.md`
-2. Adicione na lista de agentes em `CLAUDE.md`
+**Registrar o agente**:
+1. Adicionar na ordem de consulta em `.claude/agents/staff-engineer-orchestrator.md`
+2. Adicionar na lista de agentes do `CLAUDE.md`
+3. (Opcional) Criar um slash command dedicado em `.claude/commands/`
 
 ---
 
-## Como criar um novo slash command
+### 2. Novo slash command
 
-Cada command e um arquivo Markdown em `.claude/commands/`:
+**Arquivo**: `.claude/commands/<nome>.md`
 
 ```markdown
 Acione o `nome-do-agente` para [objetivo].
@@ -631,6 +618,107 @@ $ARGUMENTS
 ```
 
 A variavel `$ARGUMENTS` captura tudo que o usuario digita apos o comando.
+Commands aparecem automaticamente no prompt (ex.: `/meu-comando argumento aqui`).
+
+---
+
+### 3. Nova skill
+
+**Arquivo**: `.claude/skills/<nome>.md` (ou `.claude/skills/<nome>/SKILL.md` se tiver arquivos adicionais)
+
+```markdown
+---
+name: minha-skill
+description: Conhecimento procedural sobre X. Dispara quando o contexto envolve Y ou Z.
+---
+
+# Skill: minha-skill
+
+## Quando aplicar
+- Contexto A
+- Contexto B
+
+## Conteudo procedural
+Passos, exemplos, templates reutilizaveis.
+```
+
+Skills sao carregadas automaticamente quando o contexto da tarefa corresponde ao `description`. Nao precisam de registro explicito.
+
+Para promover a skill para uso em qualquer projeto, copie-a para `~/.claude/skills/`.
+
+---
+
+### 4. Nova permissao (Bash, WebFetch)
+
+Edite `.claude/settings.json`:
+
+```jsonc
+{
+  "permissions": {
+    "allow": [
+      "Bash(meu-comando *)",
+      "WebFetch(domain:meu-dominio.com)"
+    ],
+    "deny": [
+      "Bash(comando-perigoso *)"
+    ]
+  }
+}
+```
+
+Overrides locais (nao commitar) ficam em `.claude/settings.local.json`.
+
+---
+
+### 5. Novo hook
+
+Edite `.claude/settings.json`:
+
+```jsonc
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "bash -c 'script-de-validacao'" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash -c 'script-de-auditoria'" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Variaveis uteis para hooks:
+- `$CLAUDE_FILE_PATH` — caminho do arquivo alvo (PreToolUse de Edit/Write)
+- `$CLAUDE_TOOL_OUTPUT` — output do tool (PostToolUse)
+
+Hooks que retornam exit code != 0 bloqueiam a acao (PreToolUse) ou emitem warning (PostToolUse).
+
+---
+
+### 6. Atualizar CLAUDE.md
+
+Sempre que adicionar um agente, mudar ordem de consulta ou introduzir uma regra transversal (stack, convencao, checklist), atualize o `CLAUDE.md`. Ele e carregado automaticamente em toda sessao e define a governanca do projeto.
+
+---
+
+### Checklist antes de mergear
+
+- [ ] O arquivo esta no diretorio certo (`.claude/agents/`, `.claude/commands/`, `.claude/skills/`)?
+- [ ] O `description` e especifico o bastante para ativacao automatica correta?
+- [ ] O agente foi adicionado em `staff-engineer-orchestrator.md` e `CLAUDE.md` (se aplicavel)?
+- [ ] O `settings.json` foi ajustado se a nova config precisa de ferramenta/dominio novo?
+- [ ] O README foi atualizado com o novo papel/comando/skill?
+- [ ] Paridade com as outras plataformas (`codex/`, `copilot/`, `gemini/`) foi avaliada?
 
 ---
 
